@@ -12,7 +12,7 @@ const HeroSection = () => {
           {/* Animated Badge */}
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-            <span className="text-sm font-medium">AI-Powered Interview Coach</span>
+            <span className="text-sm font-medium">Work in Progress. Be patient with each step</span>
           </div>
 
           {/* Main Title */}
