@@ -221,6 +221,15 @@ function App() {
     }
   }
 
+  const handleStartNewInterview = () => {
+    localStorage.removeItem("interview_user_id");
+    localStorage.removeItem("interviewStarted");
+    localStorage.removeItem("jobDescription");
+    localStorage.removeItem("companyDetails");
+    localStorage.removeItem("conversation");
+    window.location.reload(); // Reload the page to reset state
+  };
+
   const handleFinishInterview = async () => {
     if (isRecording) {
       handleStopRecording(); // Stop recording if still active
@@ -271,6 +280,14 @@ function App() {
               onStopRecording={handleStopRecording}
               audioRef={audioRef}
             />
+            <button
+              onClick={handleStartNewInterview}
+              className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
+              bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600
+              focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 mb-4"
+            >
+              Start New Interview
+            </button>
             <button
               onClick={handleFinishInterview}
               className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
