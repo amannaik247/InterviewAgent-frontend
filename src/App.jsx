@@ -74,7 +74,7 @@ function App() {
     document.body.appendChild(script);
   }, []);
 
-  const API_BASE = "http://localhost:8000"
+  const API_BASE = "https://interview-agent-backend.onrender.com"
 
   const handleUploadResume = async () => {
     if (!resumeFile) {
