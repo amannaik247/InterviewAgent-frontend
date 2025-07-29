@@ -8,7 +8,8 @@ import StartInterviewButton from "./components/start-interview-button"
 import Conversation from "./components/conversation"
 import RecordingControls from "./components/recording-controls"
 import AnalysisDisplay from "./components/AnalysisDisplay"
-
+import { Client } from "https://esm.sh/@gradio/client";
+import Groq from 'groq-sdk';
 
 function App() {
   useEffect(() => {
@@ -64,16 +65,6 @@ function App() {
     localStorage.setItem("conversation", JSON.stringify(conversation))
   }, [conversation])
 
-  // using useEffect to load the SpeechSDK script
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://aka.ms/csspeech/jsbrowserpackageraw";
-    script.onload = () => {
-      setSpeechSDK(window.SpeechSDK);
-    };
-    document.body.appendChild(script);
-  }, []);
-
   const API_BASE = "https://interview-agent-backend.onrender.com"
 
   const handleUploadResume = async () => {
@@ -122,30 +113,23 @@ function App() {
     }
   }
 
-  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
   const speak = async (text) => {
-      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(import.meta.env.VITE_AZURE_SPEECH_KEY, "centralindia");
-      speechConfig.speechSynthesisVoiceName = "en-US-JennyMultilingualNeural"; // You can change voice here
+    const res = await fetch(`${API_BASE}/speak/speak_up`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
 
-      const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
-      const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
-
-      synthesizer.speakTextAsync(
-        text,
-        result => {
-          if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-            console.log("Speech synthesis succeeded.");
-          } else {
-            console.error("Speech synthesis failed. Error: ", result.errorDetails);
-          }
-          synthesizer.close();
-        },
-        error => {
-          console.error("Error during synthesis: ", error);
-          synthesizer.close();
-        }
-      );
+    if (!res.ok) {
+      console.error("TTS request failed");
+      return;
     }
+
+    const audioBlob = await res.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    audio.play();
+  }
 
   const handleStartInterview = async () => {
     try {
