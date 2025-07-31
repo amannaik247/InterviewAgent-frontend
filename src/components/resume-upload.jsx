@@ -3,15 +3,23 @@
 import { useState } from "react"
 import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react"
 
-const ResumeUpload = ({ onFileChange, onUpload, uploadStatus }) => {
+const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadStatus }) => {
   const [fileName, setFileName] = useState("")
   const [isDragOver, setIsDragOver] = useState(false)
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0]
     if (file) {
       setFileName(file.name)
-      onFileChange(file)
+      setResumeUploadStatus({ type: "loading", message: "Uploading resume..." })
+      const formData = new FormData()
+      formData.append("file", file)
+      try {
+        await onUpload(formData)
+      } catch (err) {
+        setFileName("")
+        onFileChange(null)
+      }
     } else {
       setFileName("")
       onFileChange(null)
@@ -53,9 +61,11 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus }) => {
         className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
           isDragOver
             ? "border-blue-500 bg-blue-50 scale-105"
-            : fileName
+            : uploadStatus && uploadStatus.type === "success"
               ? "border-green-500 bg-green-50"
-              : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+              : uploadStatus && uploadStatus.type === "error"
+                ? "border-red-500 bg-red-50"
+                : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -73,7 +83,6 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus }) => {
             <div className="animate-fade-in">
               <FileText className="w-12 h-12 text-green-500 mx-auto mb-2" />
               <p className="text-green-700 font-medium">{fileName}</p>
-              <p className="text-sm text-green-600">Ready to upload!</p>
             </div>
           ) : (
             <div>
@@ -90,17 +99,7 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus }) => {
       </div>
 
       {/* Upload Button */}
-      <button
-        onClick={onUpload}
-        disabled={!fileName}
-        className={`w-full mt-6 py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform ${
-          fileName
-            ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl"
-            : "bg-gray-300 cursor-not-allowed"
-        }`}
-      >
-        {fileName ? "Upload Resume" : "Select a file first"}
-      </button>
+
 
       {/* Status Message */}
       {uploadStatus && (
@@ -108,13 +107,19 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus }) => {
           className={`mt-4 p-4 rounded-lg flex items-center animate-slide-up ${
             uploadStatus.type === "success"
               ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-red-50 text-red-700 border border-red-200"
-          }`}
+              : uploadStatus.type === "error"
+                ? "bg-red-50 text-red-700 border border-red-200"
+                : "bg-blue-50 text-blue-700 border border-blue-200"
+          }`} 
         >
           {uploadStatus.type === "success" ? (
             <CheckCircle className="w-5 h-5 mr-2" />
-          ) : (
+          ) : uploadStatus.type === "error" ? (
             <AlertCircle className="w-5 h-5 mr-2" />
+          ) : (
+            <div className="w-5 h-5 mr-2 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+            </div>
           )}
           <span className="font-medium">{uploadStatus.message}</span>
         </div>

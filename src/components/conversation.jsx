@@ -1,7 +1,7 @@
 import { Bot, User, Mic } from "lucide-react"
 import { useRef, useEffect } from "react"
 
-const Conversation = ({ conversation, isRecording }) => {
+const Conversation = ({ conversation, isRecording, isProcessingTranscription }) => {
   const conversationRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -9,7 +9,7 @@ const Conversation = ({ conversation, isRecording }) => {
     if (conversationRef.current) {
       conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
     }
-  }, [conversation, isRecording]);
+  }, [conversation, isRecording, isProcessingTranscription]);
 
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-h-96 overflow-y-auto" ref={conversationRef}>
@@ -52,12 +52,34 @@ const Conversation = ({ conversation, isRecording }) => {
           ))
         )}
 
+        {/* Processing Indicator */}
+        {isProcessingTranscription && (
+          <div className="flex justify-end animate-pulse">
+            <div className="bg-blue-100 border border-blue-200 px-4 py-3 rounded-2xl max-w-xs">
+              <div className="flex items-center text-blue-600">
+                <span className="font-medium text-sm">Processing...</span>
+                <div className="ml-2 flex space-x-1">
+                  <div className="w-1 h-4 bg-blue-400 rounded-full animate-bounce"></div>
+                  <div
+                    className="w-1 h-4 bg-blue-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-1 h-4 bg-blue-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Recording Indicator */}
         {isRecording && (
           <div className="flex justify-end animate-pulse">
             <div className="bg-red-100 border border-red-200 px-4 py-3 rounded-2xl max-w-xs">
               <div className="flex items-center text-red-600">
-                <Mic className="w-4 h-4 mr-2 animate-pulse" />
+                <Mic className="w-4 h-4 mr-2" />
                 <span className="font-medium text-sm">Listening...</span>
                 <div className="ml-2 flex space-x-1">
                   <div className="w-1 h-4 bg-red-400 rounded-full animate-bounce"></div>

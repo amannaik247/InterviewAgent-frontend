@@ -75,15 +75,27 @@ const JobDetailsForm = ({
             className={`p-4 rounded-lg flex items-center animate-slide-up ${
               submitStatus.type === "success"
                 ? "bg-green-50 text-green-700 border border-green-200"
+                : submitStatus.type === "loading"
+                ? "bg-blue-50 text-blue-700 border border-blue-200"
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}
           >
             {submitStatus.type === "success" ? (
-              <CheckCircle className="w-5 h-5 mr-2" />
+              <>
+                <CheckCircle className="w-5 h-5 mr-2" />
+                <span className="font-medium">{submitStatus.message}</span>
+              </>
+            ) : submitStatus.type === "loading" ? (
+              <>
+                <div className="animate-spin w-5 h-5 mr-2 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <span className="font-medium">{submitStatus.message}</span>
+              </>
             ) : (
-              <AlertCircle className="w-5 h-5 mr-2" />
+              <>
+                <AlertCircle className="w-5 h-5 mr-2" />
+                <span className="font-medium">{submitStatus.message}</span>
+              </>
             )}
-            <span className="font-medium">{submitStatus.message}</span>
           </div>
         )}
       </div>

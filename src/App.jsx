@@ -24,14 +24,26 @@ function App() {
     const savedJobDescription = localStorage.getItem("jobDescription") || ""
     const savedCompanyDetails = localStorage.getItem("companyDetails") || ""
     const savedConversation = JSON.parse(localStorage.getItem("conversation")) || []
+    const savedIsResumeUploaded = localStorage.getItem("isResumeUploaded") === "true"
+    const savedJobDetailsSubmitted = localStorage.getItem("jobDetailsSubmitted") === "true"
 
     if (savedInterviewStarted) {
       setInterviewStarted(savedInterviewStarted)
       setJobDescription(savedJobDescription)
       setCompanyDetails(savedCompanyDetails)
       setConversation(savedConversation)
+      setIsResumeUploaded(savedIsResumeUploaded)
+      setJobDetailsSubmitted(savedJobDetailsSubmitted)
     }
   }, [])
+
+  const [isResumeUploaded, setIsResumeUploaded] = useState(false)
+  const [jobDetailsSubmitted, setJobDetailsSubmitted] = useState(false);
+
+  useEffect(() => {
+    const savedJobDetailsSubmitted = localStorage.getItem("jobDetailsSubmitted") === "true";
+    setJobDetailsSubmitted(savedJobDetailsSubmitted);
+  }, []);
 
   const [resumeFile, setResumeFile] = useState(null)
   const [jobDescription, setJobDescription] = useState("")
@@ -47,6 +59,7 @@ function App() {
   const [interviewStarted, setInterviewStarted] = useState(false)
   const [analysisData, setAnalysisData] = useState(null)
   const [SpeechSDK, setSpeechSDK] = useState(null);
+  const [isProcessingTranscription, setIsProcessingTranscription] = useState(false);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -65,26 +78,30 @@ function App() {
     localStorage.setItem("conversation", JSON.stringify(conversation))
   }, [conversation])
 
-  const API_BASE = "https://interview-agent-backend.onrender.com"
+  useEffect(() => {
+    localStorage.setItem("isResumeUploaded", isResumeUploaded)
+  }, [isResumeUploaded])
 
-  const handleUploadResume = async () => {
-    if (!resumeFile) {
-      setResumeUploadStatus({ type: "error", message: "Please select a resume file." })
-      return
-    }
+  useEffect(() => {
+    localStorage.setItem("jobDetailsSubmitted", jobDetailsSubmitted)
+  }, [jobDetailsSubmitted])
 
-    const formData = new FormData()
-    formData.append("file", resumeFile)
+  const API_BASE = "http://localhost:8000"
 
+  const handleUploadResume = async (formData) => {
     try {
       const response = await axios.post(`${API_BASE}/upload`, formData, {
         headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
         withCredentials: true,
       })
       setResumeUploadStatus({ type: "success", message: response.data.message || "Resume uploaded successfully." })
+      setResumeFile(formData.get("file"))
+      setIsResumeUploaded(true)
     } catch (err) {
       console.error(err)
       setResumeUploadStatus({ type: "error", message: "Error uploading resume." })
+      setIsResumeUploaded(false)
+      throw err
     }
   }
 
@@ -93,6 +110,8 @@ function App() {
       setJobDetailsSubmitStatus({ type: "error", message: "Please fill in both job description and company details." })
       return
     }
+
+    setJobDetailsSubmitStatus({ type: "loading", message: "Submitting job details..." });
 
     const formData = new FormData()
     formData.append("job_description", jobDescription)
@@ -106,18 +125,25 @@ function App() {
       setJobDetailsSubmitStatus({
         type: "success",
         message: response.data.message || "Job details updated successfully.",
-      })
+      });
+      setJobDetailsSubmitted(true);
     } catch (err) {
-      console.error(err)
-      setJobDetailsSubmitStatus({ type: "error", message: "Error submitting job details." })
+      console.error(err);
+      setJobDetailsSubmitStatus({ type: "error", message: "Error submitting job details." });
+      setJobDetailsSubmitted(false);
     }
   }
 
   const speak = async (text) => {
+    const voice = "Jennifer-PlayAI" //set interviewer voice here
+    // some good voices Jennifer, Deedee, Judy - female; Basil - male
     const res = await fetch(`${API_BASE}/speak/speak_up`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-ID": localStorage.getItem("interview_user_id")
+      },
+      body: JSON.stringify({ text, voice }),
     });
 
     if (!res.ok) {
@@ -156,6 +182,7 @@ function App() {
 
       recorder.ondataavailable = (e) => chunks.push(e.data)
       recorder.onstop = async () => {
+          setIsProcessingTranscription(true);
         const blob = new Blob(chunks, { type: "audio/webm" })
         const audioUrl = URL.createObjectURL(blob)
         audioRef.current.src = audioUrl
@@ -185,6 +212,8 @@ function App() {
         } catch (err) {
           console.error(err)
           alert("Error transcribing or generating next question.")
+        } finally {
+          setIsProcessingTranscription(false);
         }
       }
 
@@ -211,6 +240,7 @@ function App() {
     localStorage.removeItem("jobDescription");
     localStorage.removeItem("companyDetails");
     localStorage.removeItem("conversation");
+    localStorage.removeItem("isResumeUploaded");
     window.location.reload(); // Reload the page to reset state
   };
 
@@ -231,7 +261,7 @@ function App() {
     }
   };
 
-  const isInterviewReady = resumeFile && jobDescription && companyDetails
+  const isInterviewReady = isResumeUploaded && jobDetailsSubmitted;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
@@ -244,6 +274,7 @@ function App() {
               onFileChange={setResumeFile}
               onUpload={handleUploadResume}
               uploadStatus={resumeUploadStatus}
+              setResumeUploadStatus={setResumeUploadStatus}
             />
             <JobDetailsForm
               jobDescription={jobDescription}
@@ -257,7 +288,7 @@ function App() {
           </div>
         ) : (
           <div className="space-y-8">
-            <Conversation conversation={conversation} isRecording={isRecording} />
+            <Conversation conversation={conversation} isRecording={isRecording} isProcessingTranscription={isProcessingTranscription} />
             <RecordingControls
               isRecording={isRecording}
               onStartRecording={handleStartRecording}
