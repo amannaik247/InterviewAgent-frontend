@@ -8,6 +8,7 @@ import StartInterviewButton from "./components/start-interview-button"
 import Conversation from "./components/conversation"
 import RecordingControls from "./components/recording-controls"
 import AnalysisDisplay from "./components/AnalysisDisplay"
+import CircularAudioVisualizer from "./components/CircularAudioVisualizer"
 
 function App() {
   useEffect(() => {
@@ -58,6 +59,7 @@ function App() {
   const [analysisData, setAnalysisData] = useState(null)
   const [SpeechSDK, setSpeechSDK] = useState(null);
   const [isProcessingTranscription, setIsProcessingTranscription] = useState(false);
+  const [speakingAudio, setSpeakingAudio] = useState(null);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -84,7 +86,7 @@ function App() {
     localStorage.setItem("jobDetailsSubmitted", jobDetailsSubmitted)
   }, [jobDetailsSubmitted])
 
-  const API_BASE = "http://localhost:8000"
+  const API_BASE = "http://127.0.0.1:8000"
 
   const handleUploadResume = async (formData) => {
     try {
@@ -152,6 +154,7 @@ function App() {
     const audioBlob = await res.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
     const audio = new Audio(audioUrl);
+    setSpeakingAudio(audio);
     audio.play();
   }
 
@@ -287,6 +290,7 @@ function App() {
           </div>
         ) : (
           <div className="space-y-8">
+            <CircularAudioVisualizer audio={speakingAudio} canvasWidth={600} canvasHeight={200} />
             <Conversation conversation={conversation} isRecording={isRecording} isProcessingTranscription={isProcessingTranscription} />
             <RecordingControls
               isRecording={isRecording}
