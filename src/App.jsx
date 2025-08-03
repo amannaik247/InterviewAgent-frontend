@@ -8,8 +8,6 @@ import StartInterviewButton from "./components/start-interview-button"
 import Conversation from "./components/conversation"
 import RecordingControls from "./components/recording-controls"
 import AnalysisDisplay from "./components/AnalysisDisplay"
-import { Client } from "https://esm.sh/@gradio/client";
-import Groq from 'groq-sdk';
 
 function App() {
   useEffect(() => {
@@ -198,13 +196,16 @@ function App() {
           const userText = transRes.data.text
 
           setConversation((prev) => [...prev, { type: "answer", text: userText }])
+          setIsProcessingTranscription(false);
 
           // Now send this to generate a follow-up question
-          const followRes = await axios.post(`${API_BASE}/question/generate?user_input=${encodeURIComponent(userText)}`,
-            null, {
-            headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
-            withCredentials: true,
-          })
+          const followRes = await axios.post(`${API_BASE}/question/generate`,
+            { user_input: userText }, // Axios sends data directly as the second argument
+            {
+              headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
+              withCredentials: true,
+            }
+          )
           const followUp = followRes.data.question
 
           setConversation((prev) => [...prev, { type: "question", text: followUp }])
@@ -212,8 +213,6 @@ function App() {
         } catch (err) {
           console.error(err)
           alert("Error transcribing or generating next question.")
-        } finally {
-          setIsProcessingTranscription(false);
         }
       }
 
