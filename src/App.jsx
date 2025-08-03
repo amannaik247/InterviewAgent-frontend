@@ -86,7 +86,7 @@ function App() {
     localStorage.setItem("jobDetailsSubmitted", jobDetailsSubmitted)
   }, [jobDetailsSubmitted])
 
-  const API_BASE = "http://127.0.0.1:8000"
+  const API_BASE = "https://interview-agent-backend.onrender.com"
 
   const handleUploadResume = async (formData) => {
     try {
@@ -290,22 +290,17 @@ function App() {
           </div>
         ) : (
           <div className="space-y-8">
-            <CircularAudioVisualizer audio={speakingAudio} canvasWidth={600} canvasHeight={200} />
-            <Conversation conversation={conversation} isRecording={isRecording} isProcessingTranscription={isProcessingTranscription} />
+            <div className="flex flex-col items-center">
+            <CircularAudioVisualizer audio={speakingAudio} canvasWidth={600} canvasHeight={300} />
             <RecordingControls
               isRecording={isRecording}
               onStartRecording={handleStartRecording}
               onStopRecording={handleStopRecording}
-              audioRef={audioRef}
+              isProcessingTranscription={isProcessingTranscription}
             />
-            <button
-              onClick={handleStartNewInterview}
-              className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
-              bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600
-              focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 mb-4"
-            >
-              Start New Interview
-            </button>
+            <audio ref={audioRef} className="hidden" />
+          </div>
+            <Conversation conversation={conversation} isRecording={isRecording} isProcessingTranscription={isProcessingTranscription} />
             <button
               onClick={handleFinishInterview}
               className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
@@ -315,6 +310,14 @@ function App() {
               Finish Interview & Get Analysis
             </button>
             {analysisData && <AnalysisDisplay analysis={analysisData} />}
+            <button
+              onClick={handleStartNewInterview}
+              className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
+              bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600
+              focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 mb-4"
+            >
+              Start New Interview
+            </button>
             <div className="flex justify-center mt-8">
             </div>
           </div>

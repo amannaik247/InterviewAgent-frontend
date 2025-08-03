@@ -122,6 +122,9 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadSta
             </div>
           )}
           <span className="font-medium">{uploadStatus.message}</span>
+          {uploadStatus.type === "loading" && (
+            <span className="ml-auto text-right text-xs text-gray-500">First upload might take 60 seconds</span>
+          )}
         </div>
       )}
     </div>

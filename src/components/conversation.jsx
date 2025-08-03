@@ -12,15 +12,17 @@ const Conversation = ({ conversation, isRecording, isProcessingTranscription }) 
   }, [conversation, isRecording, isProcessingTranscription]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-h-96 overflow-y-auto" ref={conversationRef}>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
-          💬
-        </div>
-        Interview Conversation
-      </h2>
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 pb-8 max-h-96 overflow-y-auto" ref={conversationRef}>
+      <div className="sticky top-0 bg-white shadow-xl rounded-t-2xl pt-4 pb-2 px-8 z-10">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
+          <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+            💬
+          </div>
+          Interview Conversation
+        </h2>
+      </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 px-8">
         {conversation.length === 0 ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
