@@ -19,6 +19,9 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadSta
       } catch (err) {
         setFileName("")
         onFileChange(null)
+      } finally {
+        // Clear the file input value to allow re-uploading the same file
+        e.target.value = null;
       }
     } else {
       setFileName("")
