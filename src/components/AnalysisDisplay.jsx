@@ -1,8 +1,22 @@
 import React from 'react';
-import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import { CheckCircle, XCircle, HelpCircle, AlertCircle, ThumbsUp, Meh, ThumbsDown } from 'lucide-react';
 
-const AnalysisDisplay = ({ analysis }) => {
-  if (!analysis) {
+// Helper function to determine score color
+const getScoreColor = (score) => {
+  if (score >= 8) return "text-green-600";
+  if (score >= 5) return "text-yellow-600";
+  return "text-red-600";
+};
+
+// Helper function to determine score icon
+const getScoreIcon = (score) => {
+  if (score >= 8) return <ThumbsUp className="w-4 h-4 mr-1 text-green-500" />;
+  if (score >= 5) return <Meh className="w-4 h-4 mr-1 text-yellow-500" />;
+  return <ThumbsDown className="w-4 h-4 mr-1 text-red-500" />;
+};
+
+const AnalysisDisplay = ({ analysis, analysisStatus }) => {
+  if (!analysis && !analysisStatus) {
     return (
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Interview Analysis</h2>
@@ -11,17 +25,68 @@ const AnalysisDisplay = ({ analysis }) => {
     );
   }
 
-  const getScoreColor = (score) => {
-    if (score >= 8) return 'text-green-600';
-    if (score >= 5) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  if (analysisStatus && analysisStatus.type !== "success") {
+    return (
+      <div
+        className={`mt-4 p-4 rounded-lg flex items-center animate-slide-up ${
+          analysisStatus.type === "error"
+            ? "bg-red-50 text-red-700 border border-red-200"
+            : "bg-blue-50 text-blue-700 border border-blue-200"
+        }`}
+      >
+        {analysisStatus.type === "error" ? (
+          <AlertCircle className="w-5 h-5 mr-2" />
+        ) : (
+          <div className="w-5 h-5 mr-2 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+          </div>
+        )}
+        <span className="font-medium">{analysisStatus.message}</span>
+      </div>
+    );
+  }
 
-  const getScoreIcon = (score) => {
-    if (score >= 8) return <CheckCircle className="w-5 h-5 mr-2" />;
-    if (score >= 5) return <HelpCircle className="w-5 h-5 mr-2" />; // Neutral/Warning
-    return <XCircle className="w-5 h-5 mr-2" />; // Needs improvement
-  };
+  // Display success message if analysisStatus is success
+  if (analysisStatus && analysisStatus.type === "success") {
+    return (
+      <div className="mt-4">
+        <div className="p-4 rounded-lg flex items-center bg-green-50 text-green-700 border border-green-200 animate-slide-up mb-4">
+          <CheckCircle className="w-5 h-5 mr-2" />
+          <span className="font-medium">{analysisStatus.message}</span>
+        </div>
+        {/* Render the actual analysis data below the success message */}
+        {analysis && typeof analysis === 'object' && Object.keys(analysis).length > 0 ? (
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-h-96 overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+                📊
+              </div>
+              Interview Analysis
+            </h2>
+
+            <div className="space-y-6">
+              {Object.entries(analysis).map(([categoryName, categoryData]) => (
+                <div key={categoryName} className="border-b pb-4 last:border-b-0 last:pb-0">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">
+                    {getScoreIcon(categoryData.score)}
+                    {categoryName.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}
+                    <span className={`ml-auto font-bold ${getScoreColor(categoryData.score)}`}>
+                      {categoryData.score}/10
+                    </span>
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{categoryData.summary}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
+            <p className="text-gray-500">Analysis completed, but no detailed analysis data is available.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-h-96 overflow-y-auto">

@@ -57,6 +57,7 @@ function App() {
   const [jobDetailsSubmitStatus, setJobDetailsSubmitStatus] = useState(null)
   const [interviewStarted, setInterviewStarted] = useState(false)
   const [analysisData, setAnalysisData] = useState(null)
+  const [analysisStatus, setAnalysisStatus] = useState(null);
   const [SpeechSDK, setSpeechSDK] = useState(null);
   const [isProcessingTranscription, setIsProcessingTranscription] = useState(false);
   const [speakingAudio, setSpeakingAudio] = useState(null);
@@ -86,7 +87,8 @@ function App() {
     localStorage.setItem("jobDetailsSubmitted", jobDetailsSubmitted)
   }, [jobDetailsSubmitted])
 
-  const API_BASE = "https://interview-agent-backend.onrender.com"
+  // const API_BASE = "https://interview-agent-backend.onrender.com"
+  const API_BASE = "http://localhost:8000"
 
   const handleUploadResume = async (formData) => {
     try {
@@ -250,6 +252,7 @@ function App() {
     if (isRecording) {
       handleStopRecording(); // Stop recording if still active
     }
+    setAnalysisStatus({ type: "loading", message: "Analyzing interview..." });
     try {
       // The /evaluate endpoint now relies on X-User-ID header, no interviewId needed in path
       const res = await axios.post(`${API_BASE}/evaluate`, null, {
@@ -257,10 +260,12 @@ function App() {
         withCredentials: true,
       });
       setAnalysisData(res.data);
+      setAnalysisStatus({ type: "success", message: "Analysis completed!" });
     } catch (err) {
       console.error("Error fetching analysis:", err);
-      alert("Error fetching interview analysis.");
+      setAnalysisStatus({ type: "error", message: "Error fetching interview analysis: Need more Conversation" });
     }
+  
   };
 
   const isInterviewReady = isResumeUploaded && jobDetailsSubmitted;
@@ -309,7 +314,7 @@ function App() {
             >
               Finish Interview & Get Analysis
             </button>
-            {analysisData && <AnalysisDisplay analysis={analysisData} />}
+            {<AnalysisDisplay analysis={analysisData} analysisStatus={analysisStatus} />}
             <button
               onClick={handleStartNewInterview}
               className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
