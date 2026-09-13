@@ -20,8 +20,7 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadSta
         setFileName("")
         onFileChange(null)
       } finally {
-        // Clear the file input value to allow re-uploading the same file
-        e.target.value = null;
+        e.target.value = null
       }
     } else {
       setFileName("")
@@ -50,25 +49,25 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadSta
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+    <div className="bg-[#0F172A] rounded-2xl shadow-xl border border-slate-800 p-6 transition-all duration-300">
       {/* Step Header */}
-      <div className="flex items-center mb-6">
-        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+      <div className="flex items-center mb-4">
+        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs mr-2">
           1
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">Upload Your Resume</h2>
+        <h2 className="text-xl font-bold text-slate-50">Upload Your Resume</h2>
       </div>
 
       {/* Upload Area */}
       <div
-        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
+        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
           isDragOver
-            ? "border-blue-500 bg-blue-50 scale-105"
+            ? "border-orange-500 bg-slate-800/80"
             : uploadStatus && uploadStatus.type === "success"
-              ? "border-green-500 bg-green-50"
-              : uploadStatus && uploadStatus.type === "error"
-                ? "border-red-500 bg-red-50"
-                : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+            ? "border-emerald-500/60 bg-slate-800/40"
+            : uploadStatus && uploadStatus.type === "error"
+            ? "border-rose-500/60 bg-slate-800/40"
+            : "border-slate-700 bg-slate-800/40 hover:border-slate-600 hover:bg-slate-800/60"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -84,49 +83,46 @@ const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadSta
         <div className="space-y-4">
           {fileName ? (
             <div className="animate-fade-in">
-              <FileText className="w-12 h-12 text-green-500 mx-auto mb-2" />
-              <p className="text-green-700 font-medium">{fileName}</p>
+              <FileText className="w-12 h-12 text-emerald-400 mx-auto mb-2" />
+              <p className="text-emerald-400 font-medium text-sm">{fileName}</p>
             </div>
           ) : (
             <div>
               <Upload
-                className={`w-12 h-12 mx-auto mb-4 transition-colors duration-300 ${
-                  isDragOver ? "text-blue-500" : "text-gray-400"
+                className={`w-10 h-10 mx-auto mb-3 transition-colors duration-200 ${
+                  isDragOver ? "text-orange-500" : "text-slate-400"
                 }`}
               />
-              <p className="text-lg font-medium text-gray-700 mb-2">Drop your PDF here or click to browse</p>
-              <p className="text-sm text-gray-500">Supports PDF files up to 10MB</p>
+              <p className="text-base font-medium text-slate-200 mb-1">Drop your PDF here or click to browse</p>
+              <p className="text-xs text-slate-400">Supports PDF files up to 10MB</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Upload Button */}
-
-
       {/* Status Message */}
       {uploadStatus && (
         <div
-          className={`mt-4 p-4 rounded-lg flex items-center animate-slide-up ${
+          className={`mt-4 p-4 rounded-xl flex items-center border animate-slide-up ${
             uploadStatus.type === "success"
-              ? "bg-green-50 text-green-700 border border-green-200"
+              ? "bg-slate-800/90 border-emerald-500/40 text-emerald-400"
               : uploadStatus.type === "error"
-                ? "bg-red-50 text-red-700 border border-red-200"
-                : "bg-blue-50 text-blue-700 border border-blue-200"
-          }`} 
+              ? "bg-slate-800/90 border-rose-500/40 text-rose-400"
+              : "bg-slate-800/90 border-slate-700 text-slate-200"
+          }`}
         >
           {uploadStatus.type === "success" ? (
-            <CheckCircle className="w-5 h-5 mr-2" />
+            <CheckCircle className="w-5 h-5 mr-2 text-emerald-400 flex-shrink-0" />
           ) : uploadStatus.type === "error" ? (
-            <AlertCircle className="w-5 h-5 mr-2" />
+            <AlertCircle className="w-5 h-5 mr-2 text-rose-400 flex-shrink-0" />
           ) : (
-            <div className="w-5 h-5 mr-2 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700"></div>
+            <div className="w-5 h-5 mr-2 flex items-center justify-center flex-shrink-0">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
             </div>
           )}
-          <span className="font-medium">{uploadStatus.message}</span>
+          <span className="font-medium text-xs sm:text-sm text-slate-200">{uploadStatus.message}</span>
           {uploadStatus.type === "loading" && (
-            <span className="ml-auto text-right text-xs text-gray-500">First upload might take 60 seconds</span>
+            <span className="ml-auto text-right text-xs text-slate-400">First upload may take 30s</span>
           )}
         </div>
       )}

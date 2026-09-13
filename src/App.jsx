@@ -1,16 +1,60 @@
 "use client"
 import axios from "axios"
 import { useState, useEffect, useRef } from "react"
-import HeroSection from "./components/hero-section"
-import ResumeUpload from "./components/resume-upload"
-import JobDetailsForm from "./components/job-details-form"
-import StartInterviewButton from "./components/start-interview-button"
-import Conversation from "./components/conversation"
-import RecordingControls from "./components/recording-controls"
-import AnalysisDisplay from "./components/AnalysisDisplay"
-import CircularAudioVisualizer from "./components/CircularAudioVisualizer"
+import { Routes, Route, useNavigate } from "react-router-dom"
+import LandingPage from "./pages/LandingPage"
+import InterviewPage from "./pages/InterviewPage"
+import { useSpeechToText } from "./hooks/useSpeechToText"
+import { useTextToSpeech } from "./hooks/useTextToSpeech"
 
 function App() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    document.documentElement.classList.add("dark")
+  }, [])
+
+  const [isResumeUploaded, setIsResumeUploaded] = useState(false)
+  const [jobDetailsSubmitted, setJobDetailsSubmitted] = useState(false)
+  const [resumeFile, setResumeFile] = useState(null)
+  const [jobDescription, setJobDescription] = useState("")
+  const [companyDetails, setCompanyDetails] = useState("")
+  const [conversation, setConversation] = useState([])
+  const [mediaRecorder, setMediaRecorder] = useState(null)
+  const [audioChunks, setAudioChunks] = useState([])
+  const [isMediaRecorderRecording, setIsMediaRecorderRecording] = useState(false)
+  const audioRef = useRef(null)
+  const pendingFirstSpeech = useRef(null)
+
+  const [resumeUploadStatus, setResumeUploadStatus] = useState(null)
+  const [jobDetailsSubmitStatus, setJobDetailsSubmitStatus] = useState(null)
+  const [interviewStarted, setInterviewStarted] = useState(false)
+  const [analysisData, setAnalysisData] = useState(null)
+  const [analysisStatus, setAnalysisStatus] = useState(null)
+  const [isProcessingTranscription, setIsProcessingTranscription] = useState(false)
+  const [speakingAudio, setSpeakingAudio] = useState(null)
+  const [isSpeakingLoading, setIsSpeakingLoading] = useState(false)
+
+  const {
+    isSupported: isWebSpeechSupported,
+    isListening: isWebSpeechListening,
+    interimTranscript,
+    fullTranscript,
+    startListening: startWebSpeech,
+    stopListening: stopWebSpeech,
+    getFullTranscript,
+    resetTranscript,
+  } = useSpeechToText()
+
+  const {
+    isSupported: isWebTTSSupported,
+    isSpeaking: isBrowserSpeaking,
+    speak: speakBrowserText,
+    cancel: cancelBrowserSpeech,
+  } = useTextToSpeech()
+
+  const isRecording = isWebSpeechSupported ? isWebSpeechListening : isMediaRecorderRecording
+
   useEffect(() => {
     let userId = localStorage.getItem("interview_user_id")
     if (!userId) {
@@ -18,7 +62,6 @@ function App() {
       localStorage.setItem("interview_user_id", userId)
     }
 
-    // Load saved state from localStorage
     const savedInterviewStarted = localStorage.getItem("interviewStarted") === "true"
     const savedJobDescription = localStorage.getItem("jobDescription") || ""
     const savedCompanyDetails = localStorage.getItem("companyDetails") || ""
@@ -35,32 +78,6 @@ function App() {
       setJobDetailsSubmitted(savedJobDetailsSubmitted)
     }
   }, [])
-
-  const [isResumeUploaded, setIsResumeUploaded] = useState(false)
-  const [jobDetailsSubmitted, setJobDetailsSubmitted] = useState(false);
-
-  useEffect(() => {
-    const savedJobDetailsSubmitted = localStorage.getItem("jobDetailsSubmitted") === "true";
-    setJobDetailsSubmitted(savedJobDetailsSubmitted);
-  }, []);
-
-  const [resumeFile, setResumeFile] = useState(null)
-  const [jobDescription, setJobDescription] = useState("")
-  const [companyDetails, setCompanyDetails] = useState("")
-  const [conversation, setConversation] = useState([])
-  const [isRecording, setIsRecording] = useState(false)
-  const [mediaRecorder, setMediaRecorder] = useState(null)
-  const [audioChunks, setAudioChunks] = useState([])
-  const audioRef = useRef(null)
-
-  const [resumeUploadStatus, setResumeUploadStatus] = useState(null)
-  const [jobDetailsSubmitStatus, setJobDetailsSubmitStatus] = useState(null)
-  const [interviewStarted, setInterviewStarted] = useState(false)
-  const [analysisData, setAnalysisData] = useState(null)
-  const [analysisStatus, setAnalysisStatus] = useState(null);
-  const [SpeechSDK, setSpeechSDK] = useState(null);
-  const [isProcessingTranscription, setIsProcessingTranscription] = useState(false);
-  const [speakingAudio, setSpeakingAudio] = useState(null);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -87,13 +104,21 @@ function App() {
     localStorage.setItem("jobDetailsSubmitted", jobDetailsSubmitted)
   }, [jobDetailsSubmitted])
 
-  const API_BASE = "https://interview-agent-backend.onrender.com"
-  // const API_BASE = "http://localhost:8000"
+  const API_BASE = "http://localhost:8000"
+
+  const getUserId = () => {
+    let userId = localStorage.getItem("interview_user_id")
+    if (!userId || userId === "null" || userId === "undefined") {
+      userId = crypto.randomUUID()
+      localStorage.setItem("interview_user_id", userId)
+    }
+    return userId
+  }
 
   const handleUploadResume = async (formData) => {
     try {
       const response = await axios.post(`${API_BASE}/upload`, formData, {
-        headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
+        headers: { "X-User-ID": getUserId() },
         withCredentials: true,
       })
       setResumeUploadStatus({ type: "success", message: response.data.message || "Resume uploaded successfully." })
@@ -107,13 +132,24 @@ function App() {
     }
   }
 
+  const getAudioContext = () => {
+    if (!window.__interviewAudioContext) {
+      window.__interviewAudioContext = new (window.AudioContext || window.webkitAudioContext)()
+    }
+    if (window.__interviewAudioContext.state === "suspended") {
+      window.__interviewAudioContext.resume().catch(() => {})
+    }
+    return window.__interviewAudioContext
+  }
+
   const handleSubmitJobDetails = async () => {
+    getAudioContext()
     if (!jobDescription || !companyDetails) {
       setJobDetailsSubmitStatus({ type: "error", message: "Please fill in both job description and company details." })
       return
     }
 
-    setJobDetailsSubmitStatus({ type: "loading", message: "Submitting job details..." });
+    setJobDetailsSubmitStatus({ type: "loading", message: "Submitting job details..." })
 
     const formData = new FormData()
     formData.append("job_description", jobDescription)
@@ -121,214 +157,308 @@ function App() {
 
     try {
       const response = await axios.post(`${API_BASE}/job/update_details`, formData, {
-        headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
+        headers: { "X-User-ID": getUserId() },
         withCredentials: true,
       })
       setJobDetailsSubmitStatus({
         type: "success",
-        message: response.data.message || "Job details updated successfully.",
-      });
-      setJobDetailsSubmitted(true);
+        message: response.data.message || "Job details updated successfully. Ready to start interview!",
+      })
+      setJobDetailsSubmitted(true)
     } catch (err) {
-      console.error(err);
-      setJobDetailsSubmitStatus({ type: "error", message: "Error submitting job details." });
-      setJobDetailsSubmitted(false);
+      console.error(err)
+      setJobDetailsSubmitStatus({ type: "error", message: "Error submitting job details." })
+      setJobDetailsSubmitted(false)
+    }
+  }
+
+  const speakBackendFallback = async (text) => {
+    const voice = "Puck"
+    setIsSpeakingLoading(true)
+    try {
+      if (speakingAudio) {
+        speakingAudio.pause()
+        speakingAudio.currentTime = 0
+      }
+
+      const ctx = getAudioContext()
+      if (ctx.state === "suspended") {
+        await ctx.resume().catch(() => {})
+      }
+
+      const res = await fetch(`${API_BASE}/speak/speak_up`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-ID": getUserId(),
+        },
+        body: JSON.stringify({ text, voice }),
+      })
+
+      if (!res.ok) {
+        console.error("Backend TTS request failed with status:", res.status, res.statusText)
+        setIsSpeakingLoading(false)
+        return
+      }
+
+      const audioBlob = await res.blob()
+      if (!audioBlob || audioBlob.size < 100) {
+        console.error("Received invalid or 0-byte audio blob from backend TTS endpoint")
+        setIsSpeakingLoading(false)
+        return
+      }
+
+      const audioUrl = URL.createObjectURL(audioBlob)
+      const audio = new Audio(audioUrl)
+
+      setSpeakingAudio(audio)
+      setIsSpeakingLoading(false)
+
+      const playPromise = audio.play()
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Audio autoplay blocked by browser policy:", err)
+        })
+      }
+    } catch (err) {
+      console.error("Error in backend TTS fallback:", err)
+      setIsSpeakingLoading(false)
     }
   }
 
   const speak = async (text) => {
-    const voice = "Jennifer-PlayAI" //set interviewer voice here
-    // some good voices Jennifer, Deedee, Judy - female; Basil - male
-    const res = await fetch(`${API_BASE}/speak/speak_up`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-User-ID": localStorage.getItem("interview_user_id")
-      },
-      body: JSON.stringify({ text, voice }),
-    });
-
-    if (!res.ok) {
-      console.error("TTS request failed");
-      return;
+    cancelBrowserSpeech()
+    if (speakingAudio) {
+      speakingAudio.pause()
+      speakingAudio.currentTime = 0
     }
 
-    const audioBlob = await res.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-    setSpeakingAudio(audio);
-    audio.play();
+    if (isWebTTSSupported) {
+      const success = speakBrowserText(text, {
+        onError: (err) => {
+          console.warn("Browser SpeechSynthesis failed, using backend TTS fallback:", err)
+          speakBackendFallback(text)
+        },
+      })
+      if (success) return
+    }
+
+    await speakBackendFallback(text)
   }
 
   const handleStartInterview = async () => {
+    getAudioContext()
     try {
       const res = await axios.post(`${API_BASE}/question/generate`, null, {
-        headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
+        headers: { "X-User-ID": getUserId() },
         withCredentials: true,
       })
       const question = res.data.question
       setConversation((prev) => [...prev, { type: "question", text: question }])
-      speak(question)
       setInterviewStarted(true)
-      // Removed setInterviewId as interview_id is now user_id and handled by the backend
+      // Store question — speak only after user dismisses the guidelines modal
+      pendingFirstSpeech.current = question
+      navigate("/interview")
     } catch (err) {
-      console.error(err.response.data)
-      alert("Error generating initial interview question.")
+      console.error("Error in /question/generate:", err.response?.data || err)
+      const errorMsg = err.response?.data?.detail || "Error generating initial interview question."
+      alert(`Could not start interview: ${errorMsg}`)
+      navigate("/")
+    }
+  }
+
+  const handleGuidelinesAccepted = () => {
+    if (pendingFirstSpeech.current) {
+      speak(pendingFirstSpeech.current)
+      pendingFirstSpeech.current = null
+    }
+  }
+
+  const sendTranscriptToBackend = async (userText) => {
+    if (!userText || !userText.trim()) return
+
+    setConversation((prev) => [...prev, { type: "answer", text: userText }])
+    setIsProcessingTranscription(true)
+
+    try {
+      const followRes = await axios.post(
+        `${API_BASE}/question/generate`,
+        { user_input: userText },
+        {
+          headers: { "X-User-ID": getUserId() },
+          withCredentials: true,
+        }
+      )
+      const followUp = followRes.data.question
+
+      setConversation((prev) => [...prev, { type: "question", text: followUp }])
+      speak(followUp)
+    } catch (err) {
+      console.error(err)
+      alert("Error generating next question.")
+    } finally {
+      setIsProcessingTranscription(false)
     }
   }
 
   const handleStartRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
-      const chunks = []
+    getAudioContext()
+    if (isWebSpeechSupported) {
+      startWebSpeech()
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        const recorder = new MediaRecorder(stream)
+        const chunks = []
 
-      recorder.ondataavailable = (e) => chunks.push(e.data)
-      recorder.onstop = async () => {
-          setIsProcessingTranscription(true);
-        const blob = new Blob(chunks, { type: "audio/webm" })
-        const audioUrl = URL.createObjectURL(blob)
-        audioRef.current.src = audioUrl
+        recorder.ondataavailable = (e) => chunks.push(e.data)
+        recorder.onstop = async () => {
+          setIsProcessingTranscription(true)
+          const blob = new Blob(chunks, { type: "audio/webm" })
+          const audioUrl = URL.createObjectURL(blob)
+          if (audioRef.current) audioRef.current.src = audioUrl
 
-        // Send to backend for transcription
-        const formData = new FormData()
-        formData.append("file", blob, "recording.webm")
+          const formData = new FormData()
+          formData.append("file", blob, "recording.webm")
 
-        try {
-          const transRes = await axios.post(`${API_BASE}/transcribe`, formData, {
-            headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
-          })
-          const userText = transRes.data.text
-
-          setConversation((prev) => [...prev, { type: "answer", text: userText }])
-          setIsProcessingTranscription(false);
-
-          // Now send this to generate a follow-up question
-          const followRes = await axios.post(`${API_BASE}/question/generate`,
-            { user_input: userText }, // Axios sends data directly as the second argument
-            {
-              headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
-              withCredentials: true,
-            }
-          )
-          const followUp = followRes.data.question
-
-          setConversation((prev) => [...prev, { type: "question", text: followUp }])
-          speak(followUp)
-        } catch (err) {
-          console.error(err)
-          alert("Error transcribing or generating next question.")
+          try {
+            const transRes = await axios.post(`${API_BASE}/transcribe`, formData, {
+              headers: { "X-User-ID": getUserId() },
+            })
+            const userText = transRes.data.text
+            await sendTranscriptToBackend(userText)
+          } catch (err) {
+            console.error(err)
+            alert("Error transcribing or generating next question.")
+            setIsProcessingTranscription(false)
+          }
         }
-      }
 
-      setMediaRecorder(recorder)
-      setAudioChunks(chunks)
-      recorder.start()
-      setIsRecording(true)
-    } catch (err) {
-      console.error(err)
-      alert("Microphone access denied or not working.")
+        setMediaRecorder(recorder)
+        setAudioChunks(chunks)
+        recorder.start()
+        setIsMediaRecorderRecording(true)
+      } catch (err) {
+        console.error(err)
+        alert("Microphone access denied or not working.")
+      }
     }
   }
 
-  const handleStopRecording = () => {
-    if (mediaRecorder && isRecording) {
-      mediaRecorder.stop()
-      setIsRecording(false)
+  const handleStopRecording = async () => {
+    if (isWebSpeechSupported) {
+      const capturedText = stopWebSpeech() || getFullTranscript()
+      if (capturedText) {
+        await sendTranscriptToBackend(capturedText)
+      }
+    } else {
+      if (mediaRecorder && isMediaRecorderRecording) {
+        mediaRecorder.stop()
+        setIsMediaRecorderRecording(false)
+      }
     }
   }
 
   const handleStartNewInterview = () => {
-    localStorage.removeItem("interview_user_id");
-    localStorage.removeItem("interviewStarted");
-    localStorage.removeItem("jobDescription");
-    localStorage.removeItem("companyDetails");
-    localStorage.removeItem("conversation");
-    localStorage.removeItem("isResumeUploaded");
-    window.location.reload(); // Reload the page to reset state
-  };
+    cancelBrowserSpeech()
+    if (speakingAudio) {
+      speakingAudio.pause()
+      speakingAudio.currentTime = 0
+    }
+    if (isRecording) {
+      if (isWebSpeechSupported) {
+        stopWebSpeech()
+      } else if (mediaRecorder) {
+        mediaRecorder.stop()
+      }
+    }
+
+    localStorage.removeItem("interview_user_id")
+    localStorage.removeItem("interviewStarted")
+    localStorage.removeItem("jobDescription")
+    localStorage.removeItem("companyDetails")
+    localStorage.removeItem("conversation")
+    localStorage.removeItem("isResumeUploaded")
+    localStorage.removeItem("jobDetailsSubmitted")
+
+    setInterviewStarted(false)
+    setIsResumeUploaded(false)
+    setJobDetailsSubmitted(false)
+    setJobDescription("")
+    setCompanyDetails("")
+    setConversation([])
+    setAnalysisData(null)
+    setAnalysisStatus(null)
+    setResumeUploadStatus(null)
+    setJobDetailsSubmitStatus(null)
+    setResumeFile(null)
+
+    navigate("/")
+  }
 
   const handleFinishInterview = async () => {
     if (isRecording) {
-      handleStopRecording(); // Stop recording if still active
+      await handleStopRecording()
     }
-    setAnalysisStatus({ type: "loading", message: "Analyzing interview..." });
+    setAnalysisStatus({ type: "loading", message: "Analyzing interview..." })
     try {
-      // The /evaluate endpoint now relies on X-User-ID header, no interviewId needed in path
       const res = await axios.post(`${API_BASE}/evaluate`, null, {
-        headers: { "X-User-ID": localStorage.getItem("interview_user_id") },
+        headers: { "X-User-ID": getUserId() },
         withCredentials: true,
-      });
-      setAnalysisData(res.data);
-      setAnalysisStatus({ type: "success", message: "Analysis completed!" });
+      })
+      setAnalysisData(res.data)
+      setAnalysisStatus({ type: "success", message: "Analysis completed!" })
     } catch (err) {
-      console.error("Error fetching analysis:", err);
-      setAnalysisStatus({ type: "error", message: "Error fetching interview analysis: Need more Conversation" });
+      console.error("Error fetching analysis:", err)
+      setAnalysisStatus({ type: "error", message: "Error fetching interview analysis: Need more conversation." })
     }
-  
-  };
+  }
 
-  const isInterviewReady = isResumeUploaded && jobDetailsSubmitted;
+  const isInterviewReady = isResumeUploaded && jobDetailsSubmitted
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-      <HeroSection />
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {!interviewStarted ? (
-          <div className="space-y-8">
-            <ResumeUpload
-              onFileChange={setResumeFile}
-              onUpload={handleUploadResume}
-              uploadStatus={resumeUploadStatus}
-              setResumeUploadStatus={setResumeUploadStatus}
-            />
-            <JobDetailsForm
-              jobDescription={jobDescription}
-              setJobDescription={setJobDescription}
-              companyDetails={companyDetails}
-              setCompanyDetails={setCompanyDetails}
-              onSubmit={handleSubmitJobDetails}
-              submitStatus={jobDetailsSubmitStatus}
-            />
-            <StartInterviewButton onStart={handleStartInterview} isDisabled={!isInterviewReady} />
-          </div>
-        ) : (
-          <div className="space-y-8">
-            <div className="flex flex-col items-center">
-            <CircularAudioVisualizer audio={speakingAudio} canvasWidth={600} canvasHeight={300} />
-            <RecordingControls
-              isRecording={isRecording}
-              onStartRecording={handleStartRecording}
-              onStopRecording={handleStopRecording}
-              isProcessingTranscription={isProcessingTranscription}
-            />
-            <audio ref={audioRef} className="hidden" />
-          </div>
-            <Conversation conversation={conversation} isRecording={isRecording} isProcessingTranscription={isProcessingTranscription} />
-            <button
-              onClick={handleFinishInterview}
-              className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
-              bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700
-              focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-75"
-            >
-              Finish Interview & Get Analysis
-            </button>
-            {<AnalysisDisplay analysis={analysisData} analysisStatus={analysisStatus} />}
-            <button
-              onClick={handleStartNewInterview}
-              className="w-full py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out
-              bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600
-              focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 mb-4"
-            >
-              Start New Interview
-            </button>
-            <div className="flex justify-center mt-8">
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <LandingPage
+            onFileChange={setResumeFile}
+            onUploadResume={handleUploadResume}
+            uploadStatus={resumeUploadStatus}
+            setResumeUploadStatus={setResumeUploadStatus}
+            jobDescription={jobDescription}
+            setJobDescription={setJobDescription}
+            companyDetails={companyDetails}
+            setCompanyDetails={setCompanyDetails}
+            onSubmitJobDetails={handleSubmitJobDetails}
+            jobDetailsSubmitStatus={jobDetailsSubmitStatus}
+            onStartInterview={handleStartInterview}
+            isInterviewReady={isInterviewReady}
+          />
+        }
+      />
+      <Route
+        path="/interview"
+        element={
+          <InterviewPage
+            conversation={conversation}
+            isRecording={isRecording}
+            isProcessingTranscription={isProcessingTranscription}
+            isSpeakingLoading={isSpeakingLoading}
+            isBrowserSpeaking={isBrowserSpeaking}
+            speakingAudio={speakingAudio}
+            fullTranscript={fullTranscript}
+            onStartRecording={handleStartRecording}
+            onStopRecording={handleStopRecording}
+            onFinishInterview={handleFinishInterview}
+            onStartNewInterview={handleStartNewInterview}
+            onGuidelinesAccepted={handleGuidelinesAccepted}
+            analysisData={analysisData}
+            analysisStatus={analysisStatus}
+          />
+        }
+      />
+    </Routes>
   )
 }
 

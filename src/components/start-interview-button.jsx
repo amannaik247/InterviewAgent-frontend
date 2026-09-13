@@ -1,19 +1,20 @@
 "use client"
+import React from "react"
 import { Play, Lock } from "lucide-react"
 
 const StartInterviewButton = ({ onStart, isDisabled }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+    <div className="bg-[#0F172A] rounded-2xl shadow-xl border border-slate-800 p-6 transition-all duration-300">
       {/* Step Header */}
-      <div className="flex items-center mb-6">
-        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+      <div className="flex items-center mb-4">
+        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs mr-2">
           3
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">Start Your Interview</h2>
+        <h2 className="text-xl font-bold text-slate-50">Start Your Interview</h2>
       </div>
 
       {/* Description */}
-      <p className="text-gray-600 mb-6 leading-relaxed">
+      <p className="text-slate-300 mb-4 leading-relaxed text-sm">
         Ready to begin? Our AI interviewer will ask you personalized questions based on your resume and the job details
         you provided.
       </p>
@@ -22,20 +23,20 @@ const StartInterviewButton = ({ onStart, isDisabled }) => {
       <button
         onClick={onStart}
         disabled={isDisabled}
-        className={`w-full py-6 px-8 rounded-xl font-bold text-lg transition-all duration-300 transform flex items-center justify-center space-x-3 ${
+        className={`w-full py-4 px-6 rounded-xl font-semibold text-base transition-all duration-200 flex items-center justify-center space-x-3 ${
           isDisabled
-            ? "bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200"
-            : "bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white hover:scale-105 shadow-lg hover:shadow-xl"
+            ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
+            : "bg-[#1E2A3A] text-slate-100 border border-orange-500/40 hover:bg-slate-700 hover:border-orange-500/70 active:shadow-[0_0_0_2px_rgba(249,115,22,0.2)]"
         }`}
       >
         {isDisabled ? (
           <>
-            <Lock className="w-6 h-6" />
-            <span>Complete steps 1 & 2 to start</span>
+            <Lock className="w-5 h-5 text-slate-500" />
+            <span className="text-slate-400">Complete steps 1 & 2 to start</span>
           </>
         ) : (
           <>
-            <Play className="w-6 h-6" />
+            <Play className="w-5 h-5 fill-current text-orange-500" />
             <span>Start Interview</span>
           </>
         )}
@@ -43,12 +44,12 @@ const StartInterviewButton = ({ onStart, isDisabled }) => {
 
       {/* Progress Indicator */}
       {isDisabled && (
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-500 mb-2">Complete the steps above to unlock</p>
-          <div className="flex justify-center space-x-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+        <div className="mt-3 text-center">
+          <p className="text-xs text-slate-400 mb-1.5">Complete the steps above to unlock</p>
+          <div className="flex justify-center space-x-1.5">
+            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-slate-700 rounded-full"></div>
           </div>
         </div>
       )}

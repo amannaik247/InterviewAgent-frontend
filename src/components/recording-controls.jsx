@@ -1,61 +1,92 @@
 "use client"
-import { Mic, Square } from "lucide-react"
+import React from "react"
+import { Mic, Square, BarChart2, MessageSquare, Loader2 } from "lucide-react"
 
-const RecordingControls = ({ onStartRecording, onStopRecording, isRecording, isProcessingTranscription }) => {
+const RecordingControls = ({
+  isRecording,
+  isSpeaking,
+  onStartRecording,
+  onStopRecording,
+  onAnalyzeInterview,
+  isProcessingTranscription,
+  conversationLength = 0,
+  minMessagesForAnalysis = 4,
+}) => {
+  const isRecordDisabled = isSpeaking || isProcessingTranscription
+  const canAnalyze = conversationLength >= minMessagesForAnalysis
+
   return (
-    <div className="bg-white rounded-b-2xl shadow-xl border border-gray-100 pt-4 px-4 pb-4 flex items-center justify-between w-1/2 mx-auto">
+    <div className="w-full flex items-center justify-center gap-4">
+
+      {/* ── Primary: Record / Stop button (circular call-button style) ───── */}
       <button
         onClick={isRecording ? onStopRecording : onStartRecording}
-        className={`py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform flex items-center space-x-3 ${isRecording
-            ? "bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black text-white shadow-lg hover:shadow-xl"
-            : "bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white hover:scale-105 shadow-lg hover:shadow-xl"
-          }`}
+        disabled={isRecordDisabled}
+        title={
+          isProcessingTranscription
+            ? "Processing your answer..."
+            : isSpeaking
+            ? "Wait for AI to finish speaking"
+            : isRecording
+            ? "Stop recording"
+            : "Start recording your answer"
+        }
+        className={`
+          relative group w-16 h-16 rounded-full flex items-center justify-center
+          transition-all duration-300 shadow-lg flex-shrink-0
+          ${
+            isRecordDisabled
+              ? "bg-slate-800 border-2 border-slate-700 opacity-50 cursor-not-allowed"
+              : isRecording
+              ? "bg-red-500/20 border-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:bg-red-500/30 hover:shadow-[0_0_28px_rgba(239,68,68,0.55)]"
+              : "bg-orange-500/15 border-2 border-orange-500/70 shadow-[0_0_16px_rgba(249,115,22,0.25)] hover:bg-orange-500/25 hover:border-orange-400 hover:shadow-[0_0_24px_rgba(249,115,22,0.4)]"
+          }
+        `}
       >
-        {isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-        <span>{isRecording ? "Stop Recording" : "Record Response"}</span>
-      </button>
-
-      <div className="flex items-center space-x-4">
-        {isProcessingTranscription && (
-          <div className="flex animate-pulse">
-            <div className="bg-blue-100 border border-blue-200 px-3 py-2 rounded-xl">
-              <div className="flex items-center text-blue-600">
-                <span className="font-medium text-sm">Processing...</span>
-                <div className="ml-2 flex space-x-1">
-                  <div className="w-1 h-3 bg-blue-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-1 h-3 bg-blue-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-1 h-3 bg-blue-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Pulse ring while recording */}
+        {isRecording && !isRecordDisabled && (
+          <span className="absolute inset-0 rounded-full border-2 border-red-500/50 animate-ping" />
         )}
 
-        {isRecording && (
-          <div className="flex animate-pulse">
-            <div className="bg-red-100 border border-red-200 px-3 py-2 rounded-xl">
-              <div className="flex items-center text-red-600">
-                <Mic className="w-4 h-4 mr-2" />
-                <span className="font-medium text-sm">Listening...</span>
-                <div className="ml-2 flex space-x-1">
-                  <div className="w-1 h-3 bg-red-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-1 h-3 bg-red-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-1 h-3 bg-red-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+        {isProcessingTranscription ? (
+          <Loader2 className="w-6 h-6 text-orange-400 animate-spin" />
+        ) : isRecording ? (
+          <Square className="w-6 h-6 text-red-400 fill-red-400" />
+        ) : (
+          <Mic className={`w-6 h-6 ${isRecordDisabled ? "text-slate-500" : "text-orange-400"}`} />
+        )}
+      </button>
+
+      {/* ── Label below the big button ───────────────────────────────────── */}
+      <div className="flex flex-col items-start gap-2">
+        <span className={`text-xs font-medium whitespace-nowrap ${
+          isRecordDisabled ? "text-slate-500" : isRecording ? "text-red-400" : "text-slate-300"
+        }`}>
+          {isProcessingTranscription
+            ? "Processing..."
+            : isSpeaking
+            ? "AI Speaking..."
+            : isRecording
+            ? "Stop Recording"
+            : "Record Response"}
+        </span>
+
+        {/* ── Secondary: Analyze button (pill/outline) ─────────────────── */}
+        {canAnalyze ? (
+          <button
+            onClick={onAnalyzeInterview}
+            className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-200 bg-transparent text-orange-400 border border-orange-500/40 hover:bg-orange-500/10 hover:border-orange-400 whitespace-nowrap"
+          >
+            <BarChart2 className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Analyze Interview</span>
+          </button>
+        ) : (
+          <div
+            title={`Answer at least ${Math.ceil((minMessagesForAnalysis - conversationLength) / 2)} more question(s) to unlock analysis`}
+            className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs text-slate-600 border border-slate-800 cursor-not-allowed select-none whitespace-nowrap"
+          >
+            <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Chat more to analyze</span>
           </div>
         )}
       </div>

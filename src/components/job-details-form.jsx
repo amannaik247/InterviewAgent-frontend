@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 import { Briefcase, Building, CheckCircle, AlertCircle } from "lucide-react"
 
 const JobDetailsForm = ({
@@ -9,61 +10,63 @@ const JobDetailsForm = ({
   onSubmit,
   submitStatus,
 }) => {
+  const isReady = jobDescription.trim() && companyDetails.trim()
+
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+    <div className="bg-[#0F172A] rounded-2xl shadow-xl border border-slate-800 p-6 transition-all duration-300">
       {/* Step Header */}
-      <div className="flex items-center mb-6">
-        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+      <div className="flex items-center mb-4">
+        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs mr-2">
           2
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">Enter Job Details</h2>
+        <h2 className="text-xl font-bold text-slate-50">Enter Job Details</h2>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Job Description */}
         <div className="group">
-          <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-            <Briefcase className="w-4 h-4 mr-2 text-purple-500" />
+          <label className="flex items-center text-sm font-semibold text-slate-200 mb-2">
+            <Briefcase className="w-4 h-4 mr-2 text-orange-500" />
             Job Description
           </label>
           <div className="relative">
             <textarea
-              rows="4"
+              rows="3"
               placeholder="Describe the role, responsibilities, and required skills..."
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              className="w-full p-4 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 resize-none bg-gray-50 focus:bg-white group-hover:border-purple-300"
+              className="w-full p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-100 placeholder-slate-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all duration-200 resize-none text-sm"
             />
-            <div className="absolute bottom-3 right-3 text-xs text-gray-400">{jobDescription.length}/500</div>
+            <div className="absolute bottom-2.5 right-3 text-xs text-slate-500">{jobDescription.length}/500</div>
           </div>
         </div>
 
         {/* Company Details */}
         <div className="group">
-          <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-            <Building className="w-4 h-4 mr-2 text-purple-500" />
+          <label className="flex items-center text-sm font-semibold text-slate-200 mb-2">
+            <Building className="w-4 h-4 mr-2 text-orange-500" />
             Company Details
           </label>
           <div className="relative">
             <textarea
-              rows="3"
+              rows="2"
               placeholder="Company industry, culture, recent news, or any specific details..."
               value={companyDetails}
               onChange={(e) => setCompanyDetails(e.target.value)}
-              className="w-full p-4 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 resize-none bg-gray-50 focus:bg-white group-hover:border-purple-300"
+              className="w-full p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-100 placeholder-slate-500 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all duration-200 resize-none text-sm"
             />
-            <div className="absolute bottom-3 right-3 text-xs text-gray-400">{companyDetails.length}/300</div>
+            <div className="absolute bottom-2.5 right-3 text-xs text-slate-500">{companyDetails.length}/300</div>
           </div>
         </div>
 
         {/* Submit Button */}
         <button
           onClick={onSubmit}
-          disabled={!jobDescription.trim() || !companyDetails.trim()}
-          className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform ${
-            jobDescription.trim() && companyDetails.trim()
-              ? "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 hover:scale-105 shadow-lg hover:shadow-xl"
-              : "bg-gray-300 cursor-not-allowed"
+          disabled={!isReady}
+          className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center ${
+            isReady
+              ? "bg-orange-500 hover:bg-orange-600 text-white shadow-md active:bg-orange-700"
+              : "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
           }`}
         >
           Submit Job Details
@@ -72,28 +75,28 @@ const JobDetailsForm = ({
         {/* Status Message */}
         {submitStatus && (
           <div
-            className={`p-4 rounded-lg flex items-center animate-slide-up ${
+            className={`p-3 rounded-xl flex items-center border animate-slide-up ${
               submitStatus.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
+                ? "bg-slate-800/90 border-emerald-500/40 text-emerald-400"
                 : submitStatus.type === "loading"
-                ? "bg-blue-50 text-blue-700 border border-blue-200"
-                : "bg-red-50 text-red-700 border border-red-200"
+                ? "bg-slate-800/90 border-slate-700 text-slate-200"
+                : "bg-slate-800/90 border-rose-500/40 text-rose-400"
             }`}
           >
             {submitStatus.type === "success" ? (
               <>
-                <CheckCircle className="w-5 h-5 mr-2" />
-                <span className="font-medium">{submitStatus.message}</span>
+                <CheckCircle className="w-4 h-4 mr-2 text-emerald-400 flex-shrink-0" />
+                <span className="font-medium text-xs sm:text-sm text-slate-200">{submitStatus.message}</span>
               </>
             ) : submitStatus.type === "loading" ? (
               <>
-                <div className="animate-spin w-5 h-5 mr-2 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <span className="font-medium">{submitStatus.message}</span>
+                <div className="animate-spin w-4 h-4 mr-2 border-2 border-orange-500 border-t-transparent rounded-full flex-shrink-0"></div>
+                <span className="font-medium text-xs sm:text-sm text-slate-200">{submitStatus.message}</span>
               </>
             ) : (
               <>
-                <AlertCircle className="w-5 h-5 mr-2" />
-                <span className="font-medium">{submitStatus.message}</span>
+                <AlertCircle className="w-4 h-4 mr-2 text-rose-400 flex-shrink-0" />
+                <span className="font-medium text-xs sm:text-sm text-slate-200">{submitStatus.message}</span>
               </>
             )}
           </div>
