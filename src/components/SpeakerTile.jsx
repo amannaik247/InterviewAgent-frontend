@@ -88,7 +88,7 @@ export default function SpeakerTile({
           onClick={onCameraToggle}
           disabled={cameraLoading}
           title={cameraEnabled ? "Turn off camera" : "Turn on camera"}
-          className={`absolute bottom-14 left-3 z-20 w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 backdrop-blur-sm ${
+          className={`absolute bottom-2 left-2 z-20 w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-200 backdrop-blur-sm ${
             cameraLoading
               ? "bg-slate-800/70 border-slate-600 opacity-60 cursor-wait"
               : cameraEnabled
@@ -96,7 +96,7 @@ export default function SpeakerTile({
               : "bg-slate-800/70 border-slate-600 text-slate-400 hover:border-blue-400/50 hover:text-blue-300"
           }`}
         >
-          {cameraEnabled ? <Video className="w-3.5 h-3.5" /> : <VideoOff className="w-3.5 h-3.5" />}
+          {cameraEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
         </button>
       )}
 

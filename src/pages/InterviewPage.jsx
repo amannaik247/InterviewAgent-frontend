@@ -79,6 +79,50 @@ function GuidelinesModal({ onClose }) {
   )
 }
 
+// ─── Camera Prompt Modal ───────────────────────────────────────────────────────
+function CameraPromptModal({ onChoice }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+      <div className="relative bg-[#0F172A] border border-slate-700 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scaleIn">
+        {/* Glow accent */}
+        <div className="absolute -top-px left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
+
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center">
+            <MessageSquare className="w-4 h-4 text-orange-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">Camera Permission</h2>
+            <p className="text-xs text-slate-400">Enhance your interview experience</p>
+          </div>
+        </div>
+
+        {/* Prompt text */}
+        <p className="mb-6 text-sm text-slate-300 text-center">
+          Would you like to turn on your camera for the interview? Your video will only be visible to you in the speaker tile.
+        </p>
+
+        {/* CTA */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => onChoice(false)}
+            className="flex-1 py-3 rounded-xl font-semibold text-sm bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-all duration-200"
+          >
+            No, proceed without camera
+          </button>
+          <button
+            onClick={() => onChoice(true)}
+            className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-400 hover:to-orange-500 transition-all duration-200 shadow-lg shadow-orange-500/20"
+          >
+            Yes, turn on camera
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── AI Caption Hook ─────────────────────────────────────────────────────────
 /**
  * Returns the caption text to show on the AI tile.
@@ -103,14 +147,14 @@ function useAICaption(conversation, isAISpeaking) {
         clearTimeout(fadeTimerRef.current)
         clearInterval(wordTimerRef.current)
 
-        // Reveal words progressively, ~4 words per "chunk" every 600ms
-        const CHUNK = 4
+        // Reveal words progressively, ~5 words per "chunk" every 1500ms
+        const CHUNK = 5
         const revealNext = () => {
           const slice = words.slice(0, idx + CHUNK).join(" ")
           setCaption(slice)
           idx += CHUNK
           if (idx < words.length) {
-            wordTimerRef.current = setTimeout(revealNext, 600)
+            wordTimerRef.current = setTimeout(revealNext, 1500)
           }
         }
         revealNext()
@@ -165,7 +209,7 @@ function TranscriptDrawer({ open, conversation, isRecording, isProcessingTranscr
             <span className="text-sm font-semibold text-white">Full Transcript</span>
             {conversation.length > 0 && (
               <span className="text-xs text-slate-500 ml-1">
-                ({Math.floor(conversation.length / 2)} Q&amp;A)
+                ({Math.floor(conversation.length / 2)} Q&A)
               </span>
             )}
           </div>
@@ -212,6 +256,7 @@ export default function InterviewPage({
   const [activeTab, setActiveTab] = useState("interview")
   const [showGuidelines, setShowGuidelines] = useState(false)
   const [showTranscript, setShowTranscript] = useState(false)
+  const [showCameraPrompt, setShowCameraPrompt] = useState(false) // <-- NEW
 
   const { stream: cameraStream, isEnabled: cameraEnabled, isLoading: cameraLoading, toggle: toggleCamera } = useUserCamera()
 
@@ -243,7 +288,17 @@ export default function InterviewPage({
 
   const handleCloseGuidelines = () => {
     setShowGuidelines(false)
+    setShowCameraPrompt(true) // <-- Show camera prompt after guidelines
+  }
+
+  const handleCameraChoice = async (choice) => {
+    if (choice) {
+      // User said yes, turn on camera
+      await toggleCamera()
+    }
+    // Proceed with guidelines accepted
     onGuidelinesAccepted?.()
+    setShowCameraPrompt(false)
   }
 
   const handleConfirmStartNew = () => {
@@ -271,6 +326,9 @@ export default function InterviewPage({
     <div className="h-screen bg-[#0B1220] text-slate-50 flex flex-col overflow-hidden">
       {/* Guidelines modal */}
       {showGuidelines && <GuidelinesModal onClose={handleCloseGuidelines} />}
+
+      {/* Camera prompt modal */}
+      {showCameraPrompt && <CameraPromptModal onChoice={handleCameraChoice} />}
 
       {/* ── Transcript Drawer ──────────────────────────────────────────────── */}
       <TranscriptDrawer
