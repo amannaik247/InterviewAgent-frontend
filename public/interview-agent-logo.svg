@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="accent" x1="20" y1="20" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E27650"/>
+      <stop offset="1" stop-color="#C85A3D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Minimal Interview Agent mark: microphone + conversational waveform -->
+  <rect width="128" height="128" rx="28" fill="#1D1C1B"/>
+
+  <!-- Microphone -->
+  <rect x="48" y="23" width="32" height="51" rx="16"
+        fill="none" stroke="#F1EEE7" stroke-width="7"/>
+
+  <!-- Voice / interview waveform -->
+  <path d="M32 57
+           C32 75, 43 88, 64 88
+           C85 88, 96 75, 96 57"
+        fill="none" stroke="url(#accent)" stroke-width="7"
+        stroke-linecap="round"/>
+
+  <!-- Mic stand -->
+  <path d="M64 88 V103 M49 103 H79"
+        fill="none" stroke="#F1EEE7" stroke-width="7"
+        stroke-linecap="round"/>
+
+  <!-- Small signal accent -->
+  <path d="M24 50 C27 44, 30 41, 35 38"
+        fill="none" stroke="#D76543" stroke-width="5"
+        stroke-linecap="round"/>
+</svg>

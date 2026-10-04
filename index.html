@@ -1,66 +1,71 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['var(--font-sans)', 'Instrument Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-          display: ['var(--font-display)', 'Newsreader', 'Georgia', 'serif'],
-          mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
-        },
-        colors: {
-          // Terracotta accent replaces the default Tailwind orange
-          orange: {
-            50:  '#FAF0EC',
-            100: '#F3DDD4',
-            200: '#E8A58A',
-            300: '#DF8B6A',
-            400: '#D97757',
-            500: '#C6613F',
-            600: '#B5553A',
-            700: '#9C4530',
-            800: '#7E3525',
-            900: '#60271B',
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/interview-agent-logo.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-sans)', 'Instrument Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            display: ['var(--font-display)', 'Newsreader', 'Georgia', 'serif'],
+            mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
           },
-          // Warm charcoal surfaces
-          warm: {
-            page:           '#1F1E1D',
-            outer:          '#242321',
-            panel:          '#2A2927',
-            header:         '#2F2E2B',
-            input:          '#1F1E1D',
-            border:         '#3D3B37',
-            'border-hover': '#4A4843',
-            disabled:       '#2F2E2B',
-            text:           '#FAF9F5',
-            muted:          '#A8A59B',
-            placeholder:    '#7A776F',
+          colors: {
+            // Terracotta accent replaces the default Tailwind orange
+            orange: {
+              50: '#FAF0EC',
+              100: '#F3DDD4',
+              200: '#E8A58A',
+              300: '#DF8B6A',
+              400: '#D97757',
+              500: '#C6613F',
+              600: '#B5553A',
+              700: '#9C4530',
+              800: '#7E3525',
+              900: '#60271B',
+            },
+            // Warm charcoal surfaces
+            warm: {
+              page: '#1F1E1D',
+              outer: '#242321',
+              panel: '#2A2927',
+              header: '#2F2E2B',
+              input: '#1F1E1D',
+              border: '#3D3B37',
+              'border-hover': '#4A4843',
+              disabled: '#2F2E2B',
+              text: '#FAF9F5',
+              muted: '#A8A59B',
+              placeholder: '#7A776F',
+            },
           },
-        },
-        animation: {
-          'fade-in': 'fadeIn 0.5s ease-in-out',
-          'slide-up': 'slideUp 0.6s ease-out',
-          'float': 'float 6s ease-in-out infinite',
-          'float-delayed': 'float 6s ease-in-out infinite 2s',
-          'gradient-x': 'gradientX 3s ease infinite',
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.6s ease-out',
+            'float': 'float 6s ease-in-out infinite',
+            'float-delayed': 'float 6s ease-in-out infinite 2s',
+            'gradient-x': 'gradientX 3s ease infinite',
+          }
         }
       }
     }
-  }
-</script>
-    <title>Interview Agent</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+  </script>
+  <title>Interview Agent</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
