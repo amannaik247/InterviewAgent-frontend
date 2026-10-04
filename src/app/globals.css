@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +11,11 @@
   --primary: #ff6b35;
   --muted: #64748b;
   --accent: #ff6b35;
+
+  /* Font variables */
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 .dark {
@@ -17,9 +24,15 @@
   --primary: #ff6b35;
   --muted: #94a3b8;
   --accent: #ff6b35;
+
+  /* Font variables */
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 body {
+  font-family: var(--font-sans);
   background-color: var(--background);
   color: var(--foreground);
   transition: background-color 0.3s, color 0.3s;
@@ -63,6 +76,30 @@ body {
 
 .bg-light-overlay {
   background-color: rgba(248, 250, 252, 0.9);
+}
+
+/* Viewport fit for desktop (width >= 1024px and height >= 700px) */
+@media (min-width: 1024px) and (min-height: 700px) {
+  body {
+    overflow: hidden;
+  }
+  .page-desktop-fit {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: 12px 16px !important;
+  }
+  .container-desktop-fit {
+    height: 100% !important;
+    max-height: 100% !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
 }
 
 /* Existing utilities */

@@ -146,7 +146,7 @@ function App() {
     getAudioContext()
     if (!jobDescription || !companyDetails) {
       setJobDetailsSubmitStatus({ type: "error", message: "Please fill in both job description and company details." })
-      return
+      return false
     }
 
     setJobDetailsSubmitStatus({ type: "loading", message: "Submitting job details..." })
@@ -165,10 +165,12 @@ function App() {
         message: response.data.message || "Job details updated successfully. Ready to start interview!",
       })
       setJobDetailsSubmitted(true)
+      return true
     } catch (err) {
       console.error(err)
       setJobDetailsSubmitStatus({ type: "error", message: "Error submitting job details." })
       setJobDetailsSubmitted(false)
+      return false
     }
   }
 
@@ -414,6 +416,13 @@ function App() {
     }
   }
 
+  const handleRemoveResume = () => {
+    setResumeFile(null)
+    setIsResumeUploaded(false)
+    setResumeUploadStatus(null)
+    localStorage.removeItem("isResumeUploaded")
+  }
+
   const isInterviewReady = isResumeUploaded && jobDetailsSubmitted
 
   return (
@@ -426,6 +435,9 @@ function App() {
             onUploadResume={handleUploadResume}
             uploadStatus={resumeUploadStatus}
             setResumeUploadStatus={setResumeUploadStatus}
+            isResumeUploaded={isResumeUploaded}
+            onRemoveResume={handleRemoveResume}
+            resumeFile={resumeFile}
             jobDescription={jobDescription}
             setJobDescription={setJobDescription}
             companyDetails={companyDetails}

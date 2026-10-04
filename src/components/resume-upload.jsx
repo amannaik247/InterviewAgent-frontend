@@ -1,129 +1,170 @@
 "use client"
 
-import { useState } from "react"
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react"
+import { useState, useRef } from "react"
+import { Upload, FileText, AlertCircle } from "lucide-react"
 
-const ResumeUpload = ({ onFileChange, onUpload, uploadStatus, setResumeUploadStatus }) => {
-  const [fileName, setFileName] = useState("")
+const ResumeUpload = ({
+  onFileChange,
+  onUpload,
+  uploadStatus,
+  setResumeUploadStatus,
+  isResumeUploaded,
+  onRemoveResume,
+  resumeFile,
+}) => {
+  const [fileName, setFileName] = useState(resumeFile?.name || "")
+  const [fileSize, setFileSize] = useState(
+    resumeFile
+      ? resumeFile.size < 1024 * 1024
+        ? `${Math.round(resumeFile.size / 1024)} KB`
+        : `${(resumeFile.size / (1024 * 1024)).toFixed(1)} MB`
+      : ""
+  )
   const [isDragOver, setIsDragOver] = useState(false)
+  const [localError, setLocalError] = useState("")
+  const fileInputRef = useRef(null)
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setFileName(file.name)
-      setResumeUploadStatus({ type: "loading", message: "Uploading resume..." })
+  const handleValidateAndUpload = async (file) => {
+    if (!file) return
+
+    setLocalError("")
+
+    // Validate file type: PDF and DOCX only
+    const name = file.name.toLowerCase()
+    const isPdf = name.endsWith(".pdf") || file.type === "application/pdf"
+    const isDocx =
+      name.endsWith(".docx") ||
+      file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      file.type === "application/msword"
+
+    if (!isPdf && !isDocx) {
+      setLocalError("Invalid file type. Only PDF and DOCX files are allowed.")
+      return
+    }
+
+    // Validate file size: max 5 MB
+    const MAX_SIZE = 5 * 1024 * 1024
+    if (file.size > MAX_SIZE) {
+      setLocalError("File too large. Maximum file size is 5 MB.")
+      return
+    }
+
+    const formattedSize =
+      file.size < 1024 * 1024
+        ? `${Math.round(file.size / 1024)} KB`
+        : `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+
+    setFileName(file.name)
+    setFileSize(formattedSize)
+    onFileChange?.(file)
+
+    if (onUpload) {
       const formData = new FormData()
       formData.append("file", file)
       try {
+        setResumeUploadStatus?.({ type: "loading", message: "Uploading resume..." })
         await onUpload(formData)
       } catch (err) {
-        setFileName("")
-        onFileChange(null)
-      } finally {
-        e.target.value = null
+        setLocalError("Error uploading resume. Please try again.")
       }
-    } else {
-      setFileName("")
-      onFileChange(null)
     }
   }
 
-  const handleDragOver = (e) => {
-    e.preventDefault()
-    setIsDragOver(true)
-  }
-
-  const handleDragLeave = (e) => {
-    e.preventDefault()
-    setIsDragOver(false)
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    setIsDragOver(false)
-    const file = e.dataTransfer.files[0]
-    if (file && file.type === "application/pdf") {
-      setFileName(file.name)
-      onFileChange(file)
+  const handleRemove = (e) => {
+    e.stopPropagation()
+    setFileName("")
+    setFileSize("")
+    setLocalError("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
     }
+    onFileChange?.(null)
+    setResumeUploadStatus?.(null)
+    onRemoveResume?.()
   }
+
+  const isUploaded = Boolean(fileName || isResumeUploaded)
+  const displayError = localError || (uploadStatus?.type === "error" ? uploadStatus.message : "")
 
   return (
-    <div className="bg-[#0F172A] rounded-2xl shadow-xl border border-slate-800 p-6 transition-all duration-300">
-      {/* Step Header */}
-      <div className="flex items-center mb-4">
-        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs mr-2">
-          1
-        </div>
-        <h2 className="text-xl font-bold text-slate-50">Upload Your Resume</h2>
-      </div>
+    <div className="w-full">
+      <input
+        ref={fileInputRef}
+        type="file"
+        id="resume-file-input"
+        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+        className="sr-only"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) handleValidateAndUpload(file)
+        }}
+      />
 
-      {/* Upload Area */}
-      <div
-        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-          isDragOver
-            ? "border-orange-500 bg-slate-800/80"
-            : uploadStatus && uploadStatus.type === "success"
-            ? "border-emerald-500/60 bg-slate-800/40"
-            : uploadStatus && uploadStatus.type === "error"
-            ? "border-rose-500/60 bg-slate-800/40"
-            : "border-slate-700 bg-slate-800/40 hover:border-slate-600 hover:bg-slate-800/60"
-        }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <input
-          type="file"
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          onChange={handleFileChange}
-          accept=".pdf"
-        />
-
-        <div className="space-y-4">
-          {fileName ? (
-            <div className="animate-fade-in">
-              <FileText className="w-12 h-12 text-emerald-400 mx-auto mb-2" />
-              <p className="text-emerald-400 font-medium text-sm">{fileName}</p>
+      {isUploaded ? (
+        <div className="w-full h-[86px] border border-slate-700/80 rounded-[10px] px-3.5 py-2.5 bg-[#131E36]/80 flex items-center justify-between transition-all">
+          <div className="flex items-center gap-3 min-w-0 pr-2">
+            <div className="w-8 h-8 rounded-[8px] bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
+              <FileText className="w-4 h-4 text-emerald-400" />
             </div>
-          ) : (
-            <div>
-              <Upload
-                className={`w-10 h-10 mx-auto mb-3 transition-colors duration-200 ${
-                  isDragOver ? "text-orange-500" : "text-slate-400"
-                }`}
-              />
-              <p className="text-base font-medium text-slate-200 mb-1">Drop your PDF here or click to browse</p>
-              <p className="text-xs text-slate-400">Supports PDF files up to 10MB</p>
+            <div className="min-w-0">
+              <p className="text-[13px] font-semibold text-slate-200 truncate max-w-[150px] sm:max-w-[210px]" title={fileName}>
+                {fileName}
+              </p>
+              {fileSize && <p className="text-[11px] text-slate-400 mt-0.5">{fileSize}</p>}
             </div>
-          )}
+          </div>
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="px-2.5 py-1 text-[12px] font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-[8px] transition-colors cursor-pointer flex-shrink-0"
+          >
+            Remove
+          </button>
         </div>
-      </div>
-
-      {/* Status Message */}
-      {uploadStatus && (
+      ) : (
         <div
-          className={`mt-4 p-4 rounded-xl flex items-center border animate-slide-up ${
-            uploadStatus.type === "success"
-              ? "bg-slate-800/90 border-emerald-500/40 text-emerald-400"
-              : uploadStatus.type === "error"
-              ? "bg-slate-800/90 border-rose-500/40 text-rose-400"
-              : "bg-slate-800/90 border-slate-700 text-slate-200"
+          role="button"
+          tabIndex={0}
+          aria-label="Upload resume"
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              fileInputRef.current?.click()
+            }
+          }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setIsDragOver(true)
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault()
+            setIsDragOver(false)
+          }}
+          onDrop={(e) => {
+            e.preventDefault()
+            setIsDragOver(false)
+            const file = e.dataTransfer.files?.[0]
+            if (file) handleValidateAndUpload(file)
+          }}
+          className={`w-full h-[86px] border border-dashed rounded-[10px] p-2.5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center ${
+            isDragOver
+              ? "border-orange-500 bg-orange-500/10"
+              : displayError
+              ? "border-rose-500/60 bg-[#131E36]/60"
+              : "border-slate-700/80 bg-[#131E36]/60 hover:border-orange-500/60 hover:bg-orange-500/5"
           }`}
         >
-          {uploadStatus.type === "success" ? (
-            <CheckCircle className="w-5 h-5 mr-2 text-emerald-400 flex-shrink-0" />
-          ) : uploadStatus.type === "error" ? (
-            <AlertCircle className="w-5 h-5 mr-2 text-rose-400 flex-shrink-0" />
-          ) : (
-            <div className="w-5 h-5 mr-2 flex items-center justify-center flex-shrink-0">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
-            </div>
-          )}
-          <span className="font-medium text-xs sm:text-sm text-slate-200">{uploadStatus.message}</span>
-          {uploadStatus.type === "loading" && (
-            <span className="ml-auto text-right text-xs text-slate-400">First upload may take 30s</span>
-          )}
+          <Upload className={`w-4 h-4 mb-0.5 transition-colors ${isDragOver ? "text-orange-500" : "text-orange-400"}`} />
+          <span className="text-[13px] font-semibold text-slate-200">Upload resume</span>
+          <span className="text-[11px] text-slate-400">PDF or DOCX (max 5 MB)</span>
+        </div>
+      )}
+
+      {displayError && (
+        <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-rose-400 animate-slide-up" role="alert">
+          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>{displayError}</span>
         </div>
       )}
     </div>
