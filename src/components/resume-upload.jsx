@@ -101,16 +101,16 @@ const ResumeUpload = ({
       />
 
       {isUploaded ? (
-        <div className="w-full h-[86px] border border-slate-700/80 rounded-[10px] px-3.5 py-2.5 bg-[#131E36]/80 flex items-center justify-between transition-all">
+        <div className="w-full h-[86px] border border-warm-border rounded-[10px] px-3.5 py-2.5 bg-warm-input flex items-center justify-between transition-all">
           <div className="flex items-center gap-3 min-w-0 pr-2">
             <div className="w-8 h-8 rounded-[8px] bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
               <FileText className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-slate-200 truncate max-w-[150px] sm:max-w-[210px]" title={fileName}>
+              <p className="text-[13px] font-semibold text-warm-text truncate max-w-[150px] sm:max-w-[210px]" title={fileName}>
                 {fileName}
               </p>
-              {fileSize && <p className="text-[11px] text-slate-400 mt-0.5">{fileSize}</p>}
+              {fileSize && <p className="text-[11px] text-warm-muted mt-0.5">{fileSize}</p>}
             </div>
           </div>
           <button
@@ -147,17 +147,16 @@ const ResumeUpload = ({
             const file = e.dataTransfer.files?.[0]
             if (file) handleValidateAndUpload(file)
           }}
-          className={`w-full h-[86px] border border-dashed rounded-[10px] p-2.5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center ${
-            isDragOver
-              ? "border-orange-500 bg-orange-500/10"
-              : displayError
-              ? "border-rose-500/60 bg-[#131E36]/60"
-              : "border-slate-700/80 bg-[#131E36]/60 hover:border-orange-500/60 hover:bg-orange-500/5"
-          }`}
+          className={`w-full h-[86px] border border-dashed rounded-[10px] p-2.5 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center ${isDragOver
+            ? "border-orange-500 bg-orange-500/10"
+            : displayError
+              ? "border-rose-500/60 bg-warm-input"
+              : "border-warm-border bg-warm-input hover:border-orange-500/60 hover:bg-orange-500/5"
+            }`}
         >
           <Upload className={`w-4 h-4 mb-0.5 transition-colors ${isDragOver ? "text-orange-500" : "text-orange-400"}`} />
-          <span className="text-[13px] font-semibold text-slate-200">Upload resume</span>
-          <span className="text-[11px] text-slate-400">PDF or DOCX (max 5 MB)</span>
+          <span className="text-[13px] font-semibold text-warm-text">Upload resume</span>
+          <span className="text-[11px] text-warm-muted">PDF or DOCX (max 5 MB)</span>
         </div>
       )}
 

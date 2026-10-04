@@ -4,13 +4,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme variables - Improved for better text visibility */
+/* Theme variables */
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a; /* Darker slate for better readability */
-  --primary: #ff6b35;
+  --background: #FAF9F5;
+  --foreground: #1F1E1D;
+  --primary: #D97757;
   --muted: #64748b;
-  --accent: #ff6b35;
+  --accent: #D97757;
+  --accent-strong: #C6613F;
+  --accent-hover: #B5553A;
+  --accent-soft: #E8A58A;
+
+  /* Surface tokens (light mode — kept for completeness) */
+  --surface-page:    #F2F0EB;
+  --surface-outer:   #ECEAE4;
+  --surface-panel:   #E4E2DC;
+  --surface-header:  #DDDBD4;
+  --surface-input:   #F2F0EB;
+  --surface-border:  #C8C5BC;
+  --text-primary:    #1F1E1D;
+  --text-muted:      #6B6860;
+  --text-placeholder:#9B9890;
+  --border-hover:    #B5B2A8;
 
   /* Font variables */
   --font-display: 'Newsreader', Georgia, serif;
@@ -19,11 +34,26 @@
 }
 
 .dark {
-  --background: #0f172a; /* Very dark slate background */
-  --foreground: #f8fafc; /* Light slate for excellent contrast */
-  --primary: #ff6b35;
-  --muted: #94a3b8;
-  --accent: #ff6b35;
+  --background: #1F1E1D;
+  --foreground: #FAF9F5;
+  --primary: #D97757;
+  --muted: #A8A59B;
+  --accent: #D97757;
+  --accent-strong: #C6613F;
+  --accent-hover: #B5553A;
+  --accent-soft: #E8A58A;
+
+  /* Warm charcoal surface tokens */
+  --surface-page:    #1F1E1D;   /* page bg */
+  --surface-outer:   #242321;   /* outer container */
+  --surface-panel:   #2A2927;   /* panels */
+  --surface-header:  #2F2E2B;   /* quick start header tint */
+  --surface-input:   #1F1E1D;   /* inputs / recessed */
+  --surface-border:  #3D3B37;   /* all strokes */
+  --text-primary:    #FAF9F5;
+  --text-muted:      #A8A59B;
+  --text-placeholder:#7A776F;
+  --border-hover:    #4A4843;
 
   /* Font variables */
   --font-display: 'Newsreader', Georgia, serif;

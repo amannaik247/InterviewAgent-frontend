@@ -12,18 +12,32 @@ module.exports = {
       colors: {
         transparent: 'transparent',
         current: 'currentColor',
-        // Primary accent
+        // Primary accent – terracotta
         orange: {
-          50: '#FFF0E6',
-          100: '#FFE0CC',
-          200: '#FFCC99',
-          300: '#FF9966',
-          400: '#FF6B35', // Primary accent
-          500: '#E65A2F',
-          600: '#CC4E29',
-          700: '#B34223',
-          800: '#99361D',
-          900: '#802B18',
+          50: '#FAF0EC',
+          100: '#F3DDD4',
+          200: '#E8A58A', // Accent soft / light particles
+          300: '#DF8B6A',
+          400: '#D97757', // Accent base
+          500: '#C6613F', // Accent strong (button bg)
+          600: '#B5553A', // Accent hover
+          700: '#9C4530',
+          800: '#7E3525',
+          900: '#60271B',
+        },
+        // Warm charcoal surfaces
+        warm: {
+          page: '#1F1E1D',
+          outer: '#242321',
+          panel: '#2A2927',
+          header: '#2F2E2B',
+          input: '#1F1E1D',
+          border: '#3D3B37',
+          'border-hover': '#4A4843',
+          disabled: '#2F2E2B',
+          text: '#FAF9F5',
+          muted: '#A8A59B',
+          placeholder: '#7A776F',
         },
         // Dark mode neutrals
         black: {
