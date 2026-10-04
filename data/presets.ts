@@ -14,7 +14,11 @@ export type RolePreset = {
 // Copy one object in the array, give it a unique id, then edit the name/title and description.
 // The dropdowns update automatically. Do not add a "Custom" entry here.
 //
-// DESIGN NOTE: Company descriptions describe culture, values and interview style only.
+// DESIGN NOTE: Company descriptions should contain only basic, factual company information
+// that is appropriate for a job applicant, such as what the company does, its major products
+// or services, and the areas of technology/business it operates in.
+// Do not include company culture, values, interview style, hiring process, or interview tips.
+//
 // Role descriptions are company-agnostic. Any company can pair with any role (3x3 = 9 combos).
 
 export const COMPANY_PRESETS: CompanyPreset[] = [
@@ -22,27 +26,27 @@ export const COMPANY_PRESETS: CompanyPreset[] = [
     id: "google",
     name: "Google",
     description: [
-      "Google (Alphabet) organizes the world's information and builds products used by billions of people, including Search, YouTube, Android, Chrome, Maps, Google Cloud and AI research through Google DeepMind.",
-      "Culture: Data-driven, collaborative and intellectually curious. Engineers are expected to think at massive scale, favor simple and elegant solutions, and back decisions with data. Teams value psychological safety, open debate and 'Googleyness': comfort with ambiguity, humility, and doing the right thing for users.",
-      "Interview style: Structured, rubric-based interviews scored on four attributes: general cognitive ability, role-related knowledge, leadership, and Googleyness. Expect multiple rounds of whiteboard-style problem solving (algorithms and data structures, with follow-ups on complexity and edge cases), system design for senior levels, and behavioral questions about collaboration and ambiguity. Feedback is reviewed by a hiring committee rather than a single interviewer.",
+      "Google is a technology company and part of Alphabet. It develops products and services that help people find information, communicate, work, and access digital content.",
+      "Its major products and services include Google Search, YouTube, Android, Chrome, Google Maps, Google Workspace, Google Cloud, and Google Play.",
+      "Google also works across areas including artificial intelligence, machine learning, cloud computing, advertising, hardware, cybersecurity, and other technology research and development.",
     ].join("\n\n"),
   },
   {
     id: "amazon",
     name: "Amazon",
     description: [
-      "Amazon is one of the world's largest technology companies, spanning e-commerce, AWS cloud infrastructure, Alexa and devices, Prime Video, logistics and advertising. Its stated aim is to be Earth's most customer-centric company.",
-      "Culture: Run on 14 Leadership Principles, including Customer Obsession, Ownership, Invent and Simplify, Are Right A Lot, Bias for Action, Dive Deep, Deliver Results, Frugality and Earn Trust. Decisions are made through written narratives (six-page memos instead of slides) and the 'Working Backwards' process, which starts from the customer press release. Teams are small, owned end-to-end ('two-pizza teams'), and expected to operate with high standards and a strong sense of ownership.",
-      "Interview style: Heavily behavioral. Every interviewer is assigned specific Leadership Principles and expects detailed STAR-format stories with measurable results and the candidate's own contribution clearly separated from the team's. Technical roles add coding, system design and role-specific rounds. A 'Bar Raiser', an experienced interviewer from outside the hiring team, has strong influence on the final decision.",
+      "Amazon is a global technology and commerce company that provides products and services to consumers, businesses, sellers, and developers.",
+      "Its businesses include Amazon's online stores and marketplace, Amazon Web Services (AWS), Prime, advertising, logistics and fulfillment, digital content, devices, and entertainment services.",
+      "Amazon Web Services provides cloud computing, storage, databases, machine learning, analytics, security, and other infrastructure and technology services to organizations around the world.",
     ].join("\n\n"),
   },
   {
     id: "meta",
     name: "Meta",
     description: [
-      "Meta builds technologies that help people connect, including Facebook, Instagram, WhatsApp, Messenger and Threads, plus Reality Labs (Quest, Ray-Ban Meta smart glasses) and large-scale AI work such as the Llama models.",
-      "Culture: Fast-paced, impact-oriented and engineering-driven. Core values include Move Fast, Be Bold, Focus on Long-Term Impact, Build Awesome Things, Live in the Future, and Be Direct and Respect Your Colleagues. Engineers ship frequently, own problems end-to-end, and are evaluated primarily on measurable impact. Direct, candid feedback is the norm.",
-      "Interview style: Rounds are designed to be fast and rigorous. Expect two coding interviews with a strong emphasis on speed and correctness (typically two problems per 40 to 45 minutes), system design or product design for mid and senior levels, and a behavioral round focused on conflict, impact, growth and working in ambiguity. Candidates are expected to think out loud and to quantify their impact.",
+      "Meta is a technology company that develops products and services for connecting people and communities through digital platforms.",
+      "Its family of products includes Facebook, Instagram, WhatsApp, Messenger, and Threads, which provide services for communication, social networking, content sharing, and messaging.",
+      "Meta also develops technologies in areas such as artificial intelligence, virtual and augmented reality through Reality Labs, wearable devices, and large-scale computing infrastructure.",
     ].join("\n\n"),
   },
 ];
