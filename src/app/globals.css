@@ -16,16 +16,16 @@
   --accent-soft: #E8A58A;
 
   /* Surface tokens (light mode — kept for completeness) */
-  --surface-page:    #F2F0EB;
-  --surface-outer:   #ECEAE4;
-  --surface-panel:   #E4E2DC;
-  --surface-header:  #DDDBD4;
-  --surface-input:   #F2F0EB;
-  --surface-border:  #C8C5BC;
-  --text-primary:    #1F1E1D;
-  --text-muted:      #6B6860;
-  --text-placeholder:#9B9890;
-  --border-hover:    #B5B2A8;
+  --surface-page: #F2F0EB;
+  --surface-outer: #ECEAE4;
+  --surface-panel: #E4E2DC;
+  --surface-header: #DDDBD4;
+  --surface-input: #F2F0EB;
+  --surface-border: #C8C5BC;
+  --text-primary: #1F1E1D;
+  --text-muted: #6B6860;
+  --text-placeholder: #9B9890;
+  --border-hover: #B5B2A8;
 
   /* Font variables */
   --font-display: 'Newsreader', Georgia, serif;
@@ -44,16 +44,22 @@
   --accent-soft: #E8A58A;
 
   /* Warm charcoal surface tokens */
-  --surface-page:    #1F1E1D;   /* page bg */
-  --surface-outer:   #242321;   /* outer container */
-  --surface-panel:   #2A2927;   /* panels */
-  --surface-header:  #2F2E2B;   /* quick start header tint */
-  --surface-input:   #1F1E1D;   /* inputs / recessed */
-  --surface-border:  #3D3B37;   /* all strokes */
-  --text-primary:    #FAF9F5;
-  --text-muted:      #A8A59B;
-  --text-placeholder:#7A776F;
-  --border-hover:    #4A4843;
+  --surface-page: #1F1E1D;
+  /* page bg */
+  --surface-outer: #242321;
+  /* outer container */
+  --surface-panel: #2A2927;
+  /* panels */
+  --surface-header: #2F2E2B;
+  /* quick start header tint */
+  --surface-input: #1F1E1D;
+  /* inputs / recessed */
+  --surface-border: #3D3B37;
+  /* all strokes */
+  --text-primary: #FAF9F5;
+  --text-muted: #A8A59B;
+  --text-placeholder: #7A776F;
+  --border-hover: #4A4843;
 
   /* Font variables */
   --font-display: 'Newsreader', Georgia, serif;
@@ -113,6 +119,7 @@ body {
   body {
     overflow: hidden;
   }
+
   .page-desktop-fit {
     height: 100vh !important;
     height: 100dvh !important;
@@ -122,6 +129,7 @@ body {
     overflow: hidden !important;
     padding: 12px 16px !important;
   }
+
   .container-desktop-fit {
     height: 100% !important;
     max-height: 100% !important;
@@ -165,6 +173,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -176,6 +185,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -183,40 +193,53 @@ body {
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-20px);
   }
 }
 
 @keyframes gradientX {
+
   0%,
   100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
 }
 
-/* Custom scrollbar */
+/* Custom Floating Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--muted);
-  border-radius: 10px;
+  background: transparent;
+  /* Removes background gray track entirely */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 10px;
+  background: var(--surface-border);
+  /* Subtle floating pill matching border theme */
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  background: var(--accent);
+  /* Theme accent color on hover */
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border) transparent;
 }
