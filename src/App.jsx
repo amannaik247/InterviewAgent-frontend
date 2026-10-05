@@ -104,7 +104,7 @@ function App() {
     localStorage.setItem("jobDetailsSubmitted", jobDetailsSubmitted)
   }, [jobDetailsSubmitted])
 
-  const API_BASE = "http://localhost:8000"
+  const API_BASE= "https://interview-agent-backend.onrender.com"
 
   const getUserId = () => {
     let userId = localStorage.getItem("interview_user_id")
