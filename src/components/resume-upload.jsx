@@ -29,23 +29,19 @@ const ResumeUpload = ({
 
     setLocalError("")
 
-    // Validate file type: PDF and DOCX only
+    // Validate file type: PDF only
     const name = file.name.toLowerCase()
     const isPdf = name.endsWith(".pdf") || file.type === "application/pdf"
-    const isDocx =
-      name.endsWith(".docx") ||
-      file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-      file.type === "application/msword"
 
-    if (!isPdf && !isDocx) {
-      setLocalError("Invalid file type. Only PDF and DOCX files are allowed.")
+    if (!isPdf) {
+      setLocalError("Invalid file type. Only PDF files are allowed.")
       return
     }
 
     // Validate file size: max 5 MB
     const MAX_SIZE = 5 * 1024 * 1024
     if (file.size > MAX_SIZE) {
-      setLocalError("File too large. Maximum file size is 5 MB.")
+      setLocalError(`File too large. Maximum file size is 5 MB. Received ${Math.round(file.size / 1024 / 1024 * 100) / 100} MB.`)
       return
     }
 
@@ -65,7 +61,16 @@ const ResumeUpload = ({
         setResumeUploadStatus?.({ type: "loading", message: "Uploading resume..." })
         await onUpload(formData)
       } catch (err) {
-        setLocalError("Error uploading resume. Please try again.")
+        // Handle specific error types
+        if (err.message && err.message.includes("Network Error")) {
+          setLocalError("Network error. Please check your connection and try again.")
+        } else if (err.response && err.response.status === 400) {
+          setLocalError(`Upload failed: ${err.response.data.detail || "Bad request"}`)
+        } else if (err.response && err.response.status === 500) {
+          setLocalError("Server error. Please try again later.")
+        } else {
+          setLocalError("Error uploading resume. Please try again.")
+        }
       }
     }
   }
@@ -92,7 +97,7 @@ const ResumeUpload = ({
         ref={fileInputRef}
         type="file"
         id="resume-file-input"
-        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+        accept=".pdf,application/pdf"
         className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0]
@@ -156,7 +161,7 @@ const ResumeUpload = ({
         >
           <Upload className={`w-4 h-4 mb-0.5 transition-colors ${isDragOver ? "text-orange-500" : "text-orange-400"}`} />
           <span className="text-[13px] font-semibold text-warm-text">Upload resume</span>
-          <span className="text-[11px] text-warm-muted">PDF or DOCX (max 5 MB)</span>
+          <span className="text-[11px] text-warm-muted">PDF (max 5 MB)</span>
         </div>
       )}
 
